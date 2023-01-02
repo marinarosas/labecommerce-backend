@@ -1,0 +1,29 @@
+{
+  "name": "labecommerce-backend",
+  "version": "1.0.0",
+  "description": "Arquivo de introdução ao Back end ",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marinajaudy/labecommerce-backend.git"
+  },
+  "keywords": [
+    "ecommerce",
+    "commerce",
+    "intro",
+    "introdução",
+    "backend",
+    "back",
+    "end"
+  ],
+  "author": "Marina Jaudy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marinajaudy/labecommerce-backend/issues"
+  },
+  "homepage": "https://github.com/marinajaudy/labecommerce-backend#readme"
+}
