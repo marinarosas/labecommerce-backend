@@ -46,7 +46,7 @@ app.get("/products/search", (req: Request, res: Response)=>{
 app.post("/users", (req: Request, res: Response)=>{
     const {id, email, password} = req.body as TUsers
 
-    const newUser = {
+    const newUser: TUsers = {
         id,
         email,
         password
@@ -59,7 +59,7 @@ app.post("/users", (req: Request, res: Response)=>{
 app.post("/products", (req: Request, res: Response) =>{
     const {id, name, price, category} = req.body as TProduct
     
-    const newProduct = {
+    const newProduct: TProduct = {
         id,
         name,
         price,
@@ -74,7 +74,7 @@ app.post("/products", (req: Request, res: Response) =>{
 app.post("/purchases", (req: Request, res: Response)=>{
     const {userId, productId, quantity, totalPrice} = req.body as TPurchase
    
-    const newPurchase = {
+    const newPurchase: TPurchase = {
         userId,
         productId,
         quantity,
