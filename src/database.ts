@@ -2,12 +2,12 @@ import { TProduct, TPurchase, TUsers, PRODUCT_CATEGORY } from "./types"
 
 export const users: TUsers[] = [
     {
-        id: "01",
+        id: "u01",
         email: "fulano@gmail.com",
         password: "J@son"
     },
     {
-        id: "02",
+        id: "u02",
         email: "ciclano@gmail.com",
         password: "Re@ct"
     }
@@ -15,19 +15,19 @@ export const users: TUsers[] = [
 
 export const products: TProduct[] = [
     {
-        id: "01",
+        id: "p01",
         name: "Camiseta",
         price: 32,
         category: PRODUCT_CATEGORY.CLOTHES_AND_SHOES
     }, 
     {
-        id: "02",
+        id: "p02",
         name: "Pulseira",
         price: 104,
         category: PRODUCT_CATEGORY.ACCESSORIES
     },
     {
-        id: "03",
+        id: "p03",
         name: "IPhone 11",
         price: 6999,
         category: PRODUCT_CATEGORY.ELECTRONICS
@@ -36,16 +36,22 @@ export const products: TProduct[] = [
 
 export const purchase: TPurchase[] = [
     {
-        userId: `${users.map((user)=> user.id)}`,
-        productId: `${products.map((product)=> product.id)}`,
+        userId: "u01", //`${users.map((user)=> user.id)}`,
+        productId: "p01", //`${products.map((product)=> product.id)}`,
         quantity: 5,
-        totalPrice: 5*104
+        totalPrice: 5*32
     },
     {
-        userId: `${users.map((user)=> user.id)}`,
-        productId: `${products.map((product)=> product.id)}`,
-        quantity: 3,
-        totalPrice: 3*32
+        userId: "u01", //`${users.map((user)=> user.id)}`,
+        productId: "p02", //`${products.map((product)=> product.id)}`,
+        quantity: 2,
+        totalPrice: 2*104
+    },
+    {
+        userId: "u02", //`${users.map((user)=> user.id)}`,
+        productId: "p03", //`${products.map((product)=> product.id)}`,
+        quantity: 1,
+        totalPrice: 1*6999
     }
 ]
 

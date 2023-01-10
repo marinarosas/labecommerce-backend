@@ -1,12 +1,12 @@
-# Exercício da tarde - APIs e Express
+# Exercício da tarde - Aprofundamento Express
 
 ATENÇÃO! Não forke nem clone esse repositório. Ele serve apenas como enunciado!<br><br>
 
-<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar apis-e-express.</strong>
+<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar aprofundamento-express.</strong>
 
 ### Comando para criar a branch e já entrar nela
 ```
-git checkout -b apis-e-express
+git checkout -b aprofundamento-express
 ```
 <br>
 
@@ -15,6 +15,7 @@ git checkout -b apis-e-express
 - [Node e package.json](https://github.com/labenuexercicios/node-package-json-exercicios)
 - [Typescript I](https://github.com/labenuexercicios/typescript-i-exercicios)
 - [Typescript II](https://github.com/labenuexercicios/typescript-ii-exercicios)
+- [APIs e Express](https://github.com/labenuexercicios/apis-e-express-exercicios)
 
 
 
