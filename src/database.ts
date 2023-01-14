@@ -10,6 +10,11 @@ export const users: TUsers[] = [
         id: "u02",
         email: "ciclano@gmail.com",
         password: "Re@ct"
+    },
+    {
+        id: "u03",
+        email: "beltrano@gmail.com",
+        password: "J@ava"
     }
 ]
 
