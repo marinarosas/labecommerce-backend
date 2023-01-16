@@ -109,6 +109,11 @@ app.post("/users", (req: Request, res: Response) => {
             throw new Error("Faltou escrever o Id, email ou password.")
         }
 
+        if(id[0] !== "u"){
+            res.status(400)
+            throw new Error("O id deve iniciar com a letra 'u'")
+        }
+
         if (typeof id !== "string") {
             res.status(400)
             throw new Error("O tipo da Id deve ser uma string")
@@ -229,24 +234,23 @@ app.post("/products", (req: Request, res: Response) => {
 app.post("/purchases", (req: Request, res: Response) => {
 
     try {
-        const { userId, productId, quantity, totalPrice } = req.body
+        const { userId, productId, quantity } = req.body
 
         const newPurchase = {
             userId,
             productId,
             quantity,
-            totalPrice
+            totalPrice: 0
         }
 
-        if (!userId || !productId || !quantity || !totalPrice) {
+        if (!userId || !productId || !quantity) {
             res.status(400)
             throw new Error("Falta adicionar userId, productId, quantity ou totalPrice.")
         }
 
         if (typeof userId !== "string" &&
             typeof productId !== "string" &&
-            typeof quantity !== "number" &&
-            typeof totalPrice !== "number") {
+            typeof quantity !== "number") {
             res.status(400)
             throw new Error("'userId' e 'productId' são string e 'quantity' e 'totalPrice' são tipo number.")
         }
@@ -270,15 +274,15 @@ app.post("/purchases", (req: Request, res: Response) => {
         }
 
 
-        // if(findPurchaseProduct){
-        //     const verifyPriceProduct = products.filter((product)=>{
-        //         return product.price * newPurchase.quantity === newPurchase.productId * newPurchase.quantity
-        //     })
-        //     if(verifyPriceProduct !== totalPrice){
-        //         res.status(400)
-        //         throw new Error("O total não está correto.")
-        //     }
-        // }
+        if(findPurchaseProduct){
+            const totalPrice = findPurchaseProduct.price * newPurchase.quantity
+            newPurchase["totalPrice"] = totalPrice
+            // const verifyPriceProduct = findPurchaseProduct.price * newPurchase.quantity === newPurchase.totalPrice
+            // if(!verifyPriceProduct){
+            //     res.status(400)
+            //     throw new Error("O total não está correto.")
+            // }
+        }
 
         purchase.push(newPurchase)
         res.status(201).send("Compra realizado com sucesso")
@@ -372,7 +376,7 @@ app.get("/users/:id/purchases", (req: Request, res: Response) => {
 })
 
 // ## Delete User by id
-//- validar que o produto existe
+//- validar que o usuário existe
 app.delete("/users/:id", (req: Request, res: Response) => {
 
     try {
@@ -389,9 +393,9 @@ app.delete("/users/:id", (req: Request, res: Response) => {
 
         if (userDelete >= 0) {
             users.splice(userDelete, 1)
-            res.status(200).send("User apagado com sucesso")
+            res.status(200).send("Usuário apagado com sucesso")
         } else {
-            res.status(404).send("User não encontrado")
+            res.status(404).send("Usuário não encontrado")
         }
 
     } catch (error: any) {
@@ -437,26 +441,59 @@ app.delete("/products/:id", (req: Request, res: Response) => {
 })
 
 // ## Edit User by id
+//- validar que o usuário existe
+//- validar o body
 app.put("/users/:id", (req: Request, res: Response) => {
-    const id = req.params.id
 
-    const newEmail = req.body.email as string || undefined
-    const newPassword = req.body.password as string || undefined
+    try {
+        const id = req.params.id
 
-    const user = users.find((user) => {
-        return user.id === id
-    })
+        if(id[0] !== "u"){
+            res.status(400)
+            throw new Error("O id deve inicar com 'u'")
+        }
 
-    if (user) {
-        user.email = newEmail || user.email
-        user.password = newPassword || user.password
+        const {email, password} = req.body
+
+        const editUser ={
+            email,
+            password
+        }
+
+        const user = users.find((user) => {
+            return user.id === id
+        })
+
+        if(!user){
+            res.status(400)
+            throw new Error("Usuário não cadastrado.")
+        }
+
+        if(typeof email !== "string" &&
+        typeof password !== "string"){
+            res.status(400)
+            throw new Error("'email' e 'password' devem ser uma string.")
+        }
+
+        
+        if (user) {
+            user.email = editUser.email || user.email
+            user.password = editUser.password || user.password
+        }
+
+        res.status(200).send("Cadastro atualizado com sucesso")
+
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
     }
-
-    res.status(200).send("Cadastro atualizado com sucesso")
 })
 
 // ## Edit Product by id
-// - validar que o usuário existe
+// - validar que o produto existe
 //- validar o body
 app.put("/products/:id", (req: Request, res: Response) => {
 
@@ -464,12 +501,12 @@ app.put("/products/:id", (req: Request, res: Response) => {
 
         const id = req.params.id
 
-        if(id[0] !== "p"){
+        if (id[0] !== "p") {
             res.status(400)
             throw new Error("O id precisa iniciar com a letra 'p'")
         }
 
-        const {name, price, category} = req.body
+        const { name, price, category } = req.body
 
         const editProduct = {
             name,
@@ -481,21 +518,11 @@ app.put("/products/:id", (req: Request, res: Response) => {
             return product.id === id
         })
 
-        if(!product){
+        if (!product) {
             res.status(404)
             throw new Error("Produto não encontrado")
         }
 
-        if(typeof name !== "string"){
-            res.status(400)
-            throw new Error("O nome deve ser uma string.")
-        }
-
-        if(typeof price !== "number"){
-            res.status(400)
-            throw new Error("O preço deve ser um número")
-        }
-        
         if (editProduct.category !== PRODUCT_CATEGORY.ACCESSORIES &&
             editProduct.category !== PRODUCT_CATEGORY.CLOTHES_AND_SHOES &&
             editProduct.category !== PRODUCT_CATEGORY.ELECTRONICS) {
@@ -503,12 +530,23 @@ app.put("/products/:id", (req: Request, res: Response) => {
             throw new Error("o 'type' tem que ser: 'Acessórios', 'Roupas e calçados' ou 'Eletrônicos'.")
         }
 
+        if (typeof name !== "string") {
+            res.status(400)
+            throw new Error("O nome deve ser uma string.")
+        }
+
+        if (typeof price !== "number") {
+            res.status(400)
+            throw new Error("O preço deve ser um número")
+        }
+
         if (product) {
             product.name = editProduct.name || product.name
             product.price = isNaN(editProduct.price) ? product.price : editProduct.price
             product.category = editProduct.category || product.category
-        }
         res.status(200).send("Produto atualizado com sucesso")
+
+        }
 
     } catch (error: any) {
         console.log(error)
