@@ -1,12 +1,12 @@
-# Exercício da tarde - Aprofundamento SQL
+# Exercício da tarde - Relações em SQL I
 
 ATENÇÃO! Não forke nem clone esse repositório. Ele serve apenas como enunciado!<br><br>
 
-<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar aprofundamento-sql.</strong>
+<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar relacoes-sql-i.</strong>
 
 ### Comando para criar a branch e já entrar nela
 ```
-git checkout -b aprofundamento-sql
+git checkout -b relacoes-sql-i
 ```
 <br>
 
@@ -19,6 +19,7 @@ git checkout -b aprofundamento-sql
 - [Aprofundamento Express](https://github.com/labenuexercicios/aprofundamento-express-exercicios)
 - [Fluxo de Dados no Backend](https://github.com/labenuexercicios/fluxo-de-dados-backend-exercicios)
 - [Introdução a SQL](https://github.com/labenuexercicios/intro-sql-exercicios)
+- [Aprofundamento SQL](https://github.com/labenuexercicios/aprofundamento-sql-exercicios)
 
 
 

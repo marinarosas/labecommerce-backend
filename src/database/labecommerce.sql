@@ -27,8 +27,7 @@ ORDER BY email ASC;
 INSERT INTO users (id, email, password)
 VALUES
 ("u01", "marina@email.com", "123456789"),
-("u02", "alex@email.com", "1011121314"),
-("u03", "andrea@email.com", "1562756528");
+("u02", "alex@email.com", "1011121314");
 
 --## Delete User by id
 DELETE FROM users
@@ -100,4 +99,49 @@ SET
     name = 'meia', 
     price = 9.90, 
     category = 'Roupas e calçados'
-WHERE id = 'p04'
+WHERE id = 'p04';
+
+-- ## Criação da tabela de **pedidos**
+-- - nome da tabela: **purchases**
+-- - colunas da tabela:
+--   - id (TEXT, PK, único e obrigatório)
+--   - total_price (REAL, único e obrigatório)
+--   - paid (INTEGER e obrigatório)
+--   - delivered_at (TEXT e opcional)
+--   - buyer_id (TEXT, obrigatório e FK = referencia a coluna id da tabela users)
+
+CREATE TABLE purchases(
+    id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    total_price REAL NOT NULL,
+    paid INTEGER NOT NULL,
+    delivered_at TEXT,
+    buyer_id TEXT NO NULL,
+    FOREIGN KEY (buyer_id) REFERENCES users(id)
+);
+
+DROP TABLE purchases;
+
+SELECT * FROM purchases;
+
+--## a) Crie dois pedidos para cada usuário cadastrado
+INSERT INTO purchases(id, total_price, paid, buyer_id)
+VALUES
+    ('pr001', 1000, 0, 'u01'),
+    ('pr002', 300, 0, 'u01'),
+    ('pr003', 259, 0, 'u03'),
+    ('pr004', 59, 0, 'u03');
+
+INSERT INTO purchases(id, total_price, paid, buyer_id)
+VALUES
+    ('pr006', 2000, 0, 'u10'); -- se nao tiver usuario da erro!
+
+--## b) Edite o status da data de entrega de um pedido
+UPDATE purchases
+SET paid = 1,
+    delivered_at = DATETIME('now')
+WHERE id = 'pr002';
+
+SELECT * FROM users
+INNER JOIN purchases
+ON purchases.buyer_id = users.id
+WHERE users.id = 'u01'
