@@ -107,32 +107,28 @@ WHERE id = 'p004';
 --   - buyer_id (TEXT, obrigatório e FK = referencia a coluna id da tabela users)
 CREATE TABLE purchases(
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    buyer TEXT NO NULL,
     total_price REAL NOT NULL,
-    paid INTEGER NOT NULL,
-    delivered_at TEXT,
-    buyer_id TEXT NO NULL,
-    FOREIGN KEY (buyer_id) REFERENCES users(id)
+    created_at TEXT DEFAULT(DATETIME()) NOT NULL,
+    paid INTEGER DEFAULT(0) NOT NULL,
+    FOREIGN KEY (buyer) REFERENCES users(id)
 );
-
-DROP TABLE purchases;
 
 SELECT * FROM purchases;
 
 --## a) Crie dois pedidos para cada usuário cadastrado
-INSERT INTO purchases(id, total_price, paid, buyer_id)
+INSERT INTO purchases(id, buyer, total_price, paid)
 VALUES
-    ('pr001', 1000, 0, 'u01'),
-    ('pr002', 300, 0, 'u01'),
-    ('pr003', 259, 0, 'u03'),
-    ('pr004', 59, 0, 'u03');
-
-INSERT INTO purchases(id, total_price, paid, buyer_id)
-VALUES
-    ('pr006', 2000, 0, 'u10'); -- se nao tiver usuario da erro!
+    ('pr001', 'u001', 300, 1),
+    ('pr002', 'u001', 80, 1),
+    ('pr003', 'u002', 5000, 1),
+    ('pr004', 'u002', 60, 1),
+    ('pr005', 'u003', 150, 1),
+    ('pr006', 'u003', 20, 1);
 
 --## b) Edite o status da data de entrega de um pedido
 UPDATE purchases
-SET paid = 1,
+SET 
     delivered_at = DATETIME('now')
 WHERE id = 'pr004';
 
@@ -142,8 +138,23 @@ WHERE id = 'pr004';
 
 SELECT * FROM users
 INNER JOIN purchases
-ON purchases.buyer_id = users.id
-WHERE users.id = 'u01';
+ON purchases.buyer = users.id
+WHERE users.id = 'u001';
+
+SELECT 
+    users.id AS userId,
+    users.name AS userName,
+    users.email AS userEmail,
+    users.password AS userPassword,
+    users.created_at AS userCreatAt,
+    purchases.id AS purchaseId,
+    purchases.total_price AS purchaseTotalPrice,
+    purchases.created_at AS purchaseCreatAt,
+    purchases.paid AS purchasePaid
+ FROM users
+INNER JOIN purchases
+ON purchases.buyer = users.id
+WHERE users.id = 'u001';
 
 --## Criação da tabela de relações
 -- - nome da tabela: **purchases_products**
