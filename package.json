@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Arquivo de introdução ao Back end ",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "tsc && node ./build/index.js",
+    "database": "tsc && node ./build/database.js",
+    "dev": "ts-node-dev src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,16 @@
   "bugs": {
     "url": "https://github.com/marinajaudy/labecommerce-backend/issues"
   },
-  "homepage": "https://github.com/marinajaudy/labecommerce-backend#readme"
+  "homepage": "https://github.com/marinajaudy/labecommerce-backend#readme",
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.15",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "@types/node": "^18.11.18",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
 }
