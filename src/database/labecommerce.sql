@@ -6,14 +6,13 @@
 --   - id (TEXT, PK, único e obrigatório)
 --   - email (TEXT, único e obrigatório)
 --   - password (TEXT e obrigatório)
-
 CREATE TABLE users (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    created_at TEXT DEFAULT(DATETIME()) NOT NULL
 );
-
-DROP TABLE users;
 
 -- ## Get All Users
 SELECT * FROM users;
@@ -22,12 +21,12 @@ SELECT * FROM users;
 SELECT * FROM users
 ORDER BY email ASC;
 
-
 -- ## Create User
-INSERT INTO users (id, email, password)
+INSERT INTO users (id, name, email, password)
 VALUES
-("u01", "marina@email.com", "123456789"),
-("u02", "alex@email.com", "1011121314");
+('u001', 'Marina', 'marina@email.com', 'marina123'),
+('u002', 'Alex', 'alex@email.com', 'alex123'),
+('u003', 'Andrea', 'andrea@email.com', 'andrea123');
 
 --## Delete User by id
 DELETE FROM users
