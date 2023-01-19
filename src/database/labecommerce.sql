@@ -170,19 +170,36 @@ CREATE TABLE purchases_products(
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+SELECT * FROM purchases_products;
+
 -- ## Inserção dos dados
 -- Popule sua tabela purchases_products simulando 3 compras de clientes.<br>
 INSERT INTO purchases_products(purchase_id, product_id, quantity)
 VALUES
-    ('pr001', 'p01', 3),
-    ('pr002', 'p01', 4),
-    ('pr003', 'p02', 1),
-    ('pr004', 'p04', 1);
-
-SELECT * FROM purchases_products;
+    ('pr001', 'p001', 2),
+    ('pr002', 'p002', 2),
+    ('pr003', 'p003', 1),
+    ('pr004', 'p004', 3),
+    ('pr005', 'p001', 1),
+    ('pr006', 'p004', 1);
 
 -- ## Consulta com junção INNER JOIN
 -- Mostre em uma query todas as colunas das tabelas relacionadas (purchases_products, purchases e products).
 SELECT * FROM purchases_products
+INNER JOIN purchases ON purchases_products.purchase_id = purchases.id
+INNER JOIN products ON purchases_products.product_id = products.id;
+
+SELECT 
+    purchases_products.purchase_id AS purchaseId,
+    purchases_products.quantity AS purchaseProductQuantity,
+    purchases.buyer AS purchasesBuyer,
+    purchases.total_price AS purchaseTotalPrice,
+    purchases.created_at AS purchaseDate,
+    purchases.paid AS purchasePaid,
+    products.id AS productId,
+    products.name AS productName,
+    products.description AS productDescription,
+    products.image_url AS productImage
+ FROM purchases_products
 INNER JOIN purchases ON purchases_products.purchase_id = purchases.id
 INNER JOIN products ON purchases_products.product_id = products.id;
