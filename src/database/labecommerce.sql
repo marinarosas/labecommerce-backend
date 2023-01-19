@@ -30,13 +30,12 @@ VALUES
 
 --## Delete User by id
 DELETE FROM users
-WHERE id = 'u02';
+WHERE id = 'u002';
 
 --## Edit User by id
 UPDATE users
-SET password = "jgfjhfjhfjhfg"
-WHERE id = "u03";
-
+SET password = "and123rea"
+WHERE id = "u003";
 
 -- ## a) Criação da tabela de **produtos**
 -- - nome da tabela: **products**
@@ -45,12 +44,12 @@ WHERE id = "u03";
 --   - name (TEXT e obrigatório)
 --   - price (REAL e obrigatório)
 --   - category (TEXT e obrigatório)
-
 CREATE TABLE products(
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     name TEXT NOT NULL,
     price REAL NOT NULL,
-    category TEXT NOT NULL
+    description TEXT NOT NULL, 
+    image_url TEXT NOT NULL
 );
 
 --## Get All Products
@@ -70,35 +69,33 @@ SELECT * FROM products
 WHERE price >= 100 AND price <= 300
 ORDER BY price ASC;
 
-
 --## Search Product by name
 SELECT * FROM products
 WHERE name LIKE '%Cr%';
 
-DROP TABLE products;
-
 --## Create Product
-INSERT INTO products (id, name, price, category)
-VALUES ('p05', 'Mixer', 150.90, 'Eletrônicos');
--- ("p01", "Camiseta", 39.90, "Roupas e calçados"),
--- ("p02", "Ipad", 3999.90, "Eletrônicos"),
--- ("p03", "Pulseira", 19.90, "Acessórios");
+INSERT INTO products (id, name, price, description, image_url)
+VALUES ('p001', 'mixer', 150, 'Eletrônicos: Mixer 220v, multi funções', 'https://picsum.photos/200'),
+("p002", "camiseta", 40, "Roupas e calçados: Camiseta azul com desenho geometricos", 'https://picsum.photos/200'),
+("p003", "ipad", 5000, "Eletrônicos: ipad de 6,8 polegadas, bivolt", 'https://picsum.photos/200'),
+("p004", "pulseira", 20, "Acessórios: pulseira banhado a ouro com pedrinhas vermelhas", 'https://picsum.photos/200');
 
 --## Get Products by id
 SELECT * FROM products
-WHERE id = 'p02';
+WHERE id = 'p002';
 
 --## Delete Product by id
 DELETE FROM products
-WHERE id = 'p05';
+WHERE id = 'p005';
 
 --## Edit Product by id
 UPDATE products
 SET 
     name = 'meia', 
-    price = 9.90, 
-    category = 'Roupas e calçados'
-WHERE id = 'p04';
+    price = 10, 
+    description = 'Roupas e calçados',
+    image_url = 'https://picsum.photos/200'
+WHERE id = 'p004';
 
 -- ## Criação da tabela de **pedidos**
 -- - nome da tabela: **purchases**
@@ -108,7 +105,6 @@ WHERE id = 'p04';
 --   - paid (INTEGER e obrigatório)
 --   - delivered_at (TEXT e opcional)
 --   - buyer_id (TEXT, obrigatório e FK = referencia a coluna id da tabela users)
-
 CREATE TABLE purchases(
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     total_price REAL NOT NULL,
@@ -158,10 +154,10 @@ WHERE users.id = 'u01';
 CREATE TABLE purchases_products(
     purchase_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
-    quantity INTEGER NOT NULL
+    quantity INTEGER NOT NULL,
+    FOREIGN KEY (purchase_id) REFERENCES purchases(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
 );
-
-DROP TABLE purchases_products;
 
 -- ## Inserção dos dados
 -- Popule sua tabela purchases_products simulando 3 compras de clientes.<br>
