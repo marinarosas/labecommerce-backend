@@ -46,11 +46,17 @@ app.get("/users", async (req: Request, res: Response) => {
 })
 
 // ## Get All Products
-//- não precisa de validação, basta refatorar para o uso do try/catch
-app.get("/products", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/products")
+// - response
+//     - status 200
+//     - array de products do arquivo .db
+app.get("/products", async (req: Request, res: Response) => {
 
     try {
-        res.status(200).send(products)
+
+        const results = await db.raw(`SELECT * FROM products`)
+        res.status(200).send(results)
 
     } catch (error: any) {
         console.log(error)

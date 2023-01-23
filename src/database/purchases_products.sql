@@ -1,4 +1,4 @@
--- Active: 1673889528617@@127.0.0.1@3306
+-- Active: 1674516160340@@127.0.0.1@3306
 
 --## Criação da tabela de relações
 -- - nome da tabela: **purchases_products**

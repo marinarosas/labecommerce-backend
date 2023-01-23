@@ -1,4 +1,4 @@
--- Active: 1673889528617@@127.0.0.1@3306
+-- Active: 1674516160340@@127.0.0.1@3306
 
 -- ## a) Criação da tabela de **pessoas usuárias**
 -- - nome da tabela: **users**
