@@ -69,14 +69,19 @@ app.get("/products", async (req: Request, res: Response) => {
 })
 
 // ## Search Product by name
-//- query params deve possuir pelo menos um caractere
-app.get("/products/search", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/product/search")
+// - query params
+//     - q
+// - response
+//     - status 200
+//     - array do resultado da busca no arquivo .db
+app.get("/products/search", async (req: Request, res: Response) => {
 
     try {
         const q = req.query.q as string
-        const results = products.filter((product) => {
-            return product.name.toLowerCase().includes(q.toLowerCase())
-        })
+        const results = await db.raw(`SELECT * FROM products
+        WHERE name LIKE '${q}';`)
 
         if (q.length < 1) {
             res.status(400)
