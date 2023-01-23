@@ -18,6 +18,7 @@ CREATE TABLE purchases(
 );
 
 SELECT * FROM purchases;
+DROP TABLE purchases;
 
 --## a) Crie dois pedidos para cada usuário cadastrado
 INSERT INTO purchases(id, buyer, total_price, paid)
