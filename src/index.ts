@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { products, users, purchase } from "./database"
 import { TProduct, TUsers, TPurchase, PRODUCT_CATEGORY } from './types'
+import {db} from './database/knex'
 
 console.log('Hello world!')
 
@@ -23,11 +24,17 @@ app.get('/ping', (req: Request, res: Response) => {
 })
 
 // ## Get All Users
-//- não precisa de validação, basta refatorar para o uso do try/catch
-app.get("/users", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/users")
+// - response
+//     - status 200
+//     - array de users do arquivo .db
+app.get("/users", async (req: Request, res: Response) => {
 
     try {
-        res.status(200).send(users)
+
+        const result = await db.raw(`SELECT * FROM users`)
+        res.status(200).send(result)
 
     } catch (error: any) {
         console.log(error)
