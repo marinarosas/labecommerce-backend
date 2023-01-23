@@ -15,6 +15,7 @@ CREATE TABLE purchases_products(
 );
 
 SELECT * FROM purchases_products;
+DROP TABLE purchases_products;
 
 -- ## Inserção dos dados
 -- Popule sua tabela purchases_products simulando 3 compras de clientes.<br>
