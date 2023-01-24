@@ -409,7 +409,7 @@ app.get("/users/:id/purchases", async (req: Request, res: Response) => {
         }
 
         if (userFind) {
-    
+
             const purchaseFind = await db.raw(`
             SELECT * FROM purchases_products
             WHERE buyer = "${id}"
@@ -456,7 +456,7 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
             DELETE FROM users
             WHERE id = '${id}'
             `)
-            
+
             res.status(200).send("Usuário apagado com sucesso")
 
         } else {
@@ -485,13 +485,13 @@ app.delete("/products/:id", async (req: Request, res: Response) => {
             WHERE id = '${id}'
         `)
 
-        if (productDelete){
+        if (productDelete) {
             await db.raw(`
             DELETE FROM products
             WHERE id = '${id}'
             `)
             res.status(200).send("Produto apagado com sucesso")
-            
+
         } else {
             res.status(400)
             throw new Error("Produto não existe")
@@ -523,7 +523,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
         const { name, email, password } = req.body
 
         const editUser = {
-            name, 
+            name,
             email,
             password
         }
@@ -553,8 +553,8 @@ app.put("/users/:id", async (req: Request, res: Response) => {
                 password = "${editUser.password || user.password}"
             WHERE id = "${id}"
             `)
-            
-        }else{
+
+        } else {
             res.status(400)
             throw new Error("Usuário não cadastrado.")
         }
@@ -573,7 +573,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
 // ## Edit Product by id
 // - validar que o produto existe
 //- validar o body
-app.put("/products/:id", (req: Request, res: Response) => {
+app.put("/products/:id", async (req: Request, res: Response) => {
 
     try {
 
@@ -584,21 +584,19 @@ app.put("/products/:id", (req: Request, res: Response) => {
             throw new Error("O id precisa iniciar com a letra 'p'")
         }
 
-        const { name, price, } = req.body
+        const { name, price, description, image_url } = req.body
 
         const editProduct = {
             name,
-            price
+            price,
+            description,
+            image_url
         }
 
-        const product = products.find((product) => {
-            return product.id === id
-        })
-
-        if (!product) {
-            res.status(404)
-            throw new Error("Produto não encontrado")
-        }
+        const product = await db.raw(`
+            SELECT * FROM products
+            WHERE id = "${id}
+        `)
 
         if (typeof name !== "string") {
             res.status(400)
@@ -609,14 +607,24 @@ app.put("/products/:id", (req: Request, res: Response) => {
             res.status(400)
             throw new Error("O preço deve ser um número")
         }
+        if (!product) {
+            res.status(404)
+            throw new Error("Produto não encontrado")
+        }
 
-        // if (product) {
-        //     product.name = editProduct.name || product.name
-        //     product.price = isNaN(editProduct.price) ? product.price : editProduct.price
-        //     product.category = editProduct.category || product.category
-        // res.status(200).send("Produto atualizado com sucesso")
+        if (product) {
+            await db.raw(`
+            UPDATE products
+            SET 
+                name = '${editProduct.name}', 
+                price = ${editProduct.price}, 
+                description = '${editProduct.description}',
+                image_url = '${editProduct.image_url}'
+            WHERE id = '${id}'
+            `)
+            res.status(200).send("Produto atualizado com sucesso")
 
-        // }
+        }
 
     } catch (error: any) {
         console.log(error)
