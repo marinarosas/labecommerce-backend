@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
-import { products, users, purchase } from "./database"
+// import { products, users, purchase } from "./database"
 // import { TProduct, TUsers, TPurchase, PRODUCT_CATEGORY } from './types'
 import { db } from './database/knex'
 
