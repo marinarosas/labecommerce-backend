@@ -332,7 +332,7 @@ app.post("/purchases", async (req: Request, res: Response) => {
             throw new Error("Compra não realizada.")
         }
 
-        purchase.push(newPurchase)
+        purchases.push(newPurchase)
         res.status(201).send("Compra realizado com sucesso")
 
     } catch (error: any) {
