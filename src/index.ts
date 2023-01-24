@@ -317,7 +317,7 @@ app.post("/purchases", async (req: Request, res: Response) => {
             res.status(400)
             throw new Error("'userId' e 'productId' são string e 'total_price' são tipo number.")
         }
-  
+
         const [findPurchase] = await db.raw(`
             SELECT * FROM purchases
             WHERE id = "${newPurchase.id}"
@@ -345,8 +345,12 @@ app.post("/purchases", async (req: Request, res: Response) => {
 })
 
 // ## Get Products by id
-//- validar que o produto existe
-app.get("/products/:id", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/products/:id")
+// - response
+//     - status 200
+//     - objeto encontrado do arquivo .db
+app.get("/products/:id", async (req: Request, res: Response) => {
 
     try {
         const id = req.params.id
@@ -356,9 +360,10 @@ app.get("/products/:id", (req: Request, res: Response) => {
             throw new Error("Faltou iniciar a Id com 'p'")
         }
 
-        const result = products.find((product) => {
-            return product.id === id
-        })
+        const result = await db.raw(`
+            SELECT * FROM products
+            WHERE id = '${id}'
+        `)
 
         if (!result) {
             res.status(400)
@@ -378,8 +383,12 @@ app.get("/products/:id", (req: Request, res: Response) => {
 })
 
 // ## Get User Purchases by User id
-//- validar que o produto existe
-app.get("/users/:id/purchases", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/users/:id/purchases")
+// - response
+//     - status 200
+//     - array de compras do user no arquivo .db
+app.get("/users/:id/purchases", async (req: Request, res: Response) => {
 
     try {
         const id = req.params.id
@@ -389,9 +398,10 @@ app.get("/users/:id/purchases", (req: Request, res: Response) => {
             throw new Error("Faltou inicar o Id do usuário com 'u'")
         }
 
-        const userFind = users.find((user) => {
-            return user.id === id
-        })
+        const [userFind] = await db.raw(`
+            SELECT * FROM users
+            WHERE id = '${id}'
+        `)
 
         if (!userFind) {
             res.status(400)
@@ -399,9 +409,11 @@ app.get("/users/:id/purchases", (req: Request, res: Response) => {
         }
 
         if (userFind) {
-            const purchaseFind = purchase.filter((p) => {
-                return p.userId === userFind.id
-            })
+    
+            const purchaseFind = await db.raw(`
+            SELECT * FROM purchases_products
+            WHERE buyer = "${id}"
+            `)
 
             if (purchaseFind.length < 1) {
                 res.status(400)
@@ -425,25 +437,31 @@ app.get("/users/:id/purchases", (req: Request, res: Response) => {
 
 // ## Delete User by id
 //- validar que o usuário existe
-app.delete("/users/:id", (req: Request, res: Response) => {
+app.delete("/users/:id", async (req: Request, res: Response) => {
 
     try {
         const id = req.params.id
 
-        const userDelete = users.findIndex((user) => {
-            return user.id === id
-        })
+        // const userDelete = users.findIndex((user) => {
+        //     return user.id === id
+        // })
 
-        if (userDelete === -1) {
+        const [userExist] = await db.raw(`
+            SELECT * FROM user
+            WHERE id= "${id}"
+        `)
+
+        if (userExist) {
+            await db.raw(`
+            DELETE FROM users
+            WHERE id = '${id}'
+            `)
+            
+            res.status(200).send("Usuário apagado com sucesso")
+
+        } else {
             res.status(400)
             throw new Error("Usuário não existe")
-        }
-
-        if (userDelete >= 0) {
-            users.splice(userDelete, 1)
-            res.status(200).send("Usuário apagado com sucesso")
-        } else {
-            res.status(404).send("Usuário não encontrado")
         }
 
     } catch (error: any) {
@@ -457,25 +475,26 @@ app.delete("/users/:id", (req: Request, res: Response) => {
 
 // ## Delete Product by id
 //- validar que o produto existe
-app.delete("/products/:id", (req: Request, res: Response) => {
+app.delete("/products/:id", async (req: Request, res: Response) => {
 
     try {
         const id = req.params.id
 
-        const productDelete = products.findIndex((product) => {
-            return product.id === id
-        })
+        const productDelete = await db.raw(`
+            SELECT FROM products
+            WHERE id = '${id}'
+        `)
 
-        if (productDelete === -1) {
+        if (productDelete){
+            await db.raw(`
+            DELETE FROM products
+            WHERE id = '${id}'
+            `)
+            res.status(200).send("Produto apagado com sucesso")
+            
+        } else {
             res.status(400)
             throw new Error("Produto não existe")
-        }
-
-        if (productDelete >= 0) {
-            products.splice(productDelete, 1)
-            res.status(200).send("Produto apagado com sucesso")
-        } else {
-            res.status(404).send("Produto não encontrado")
         }
 
     } catch (error: any) {
@@ -491,7 +510,7 @@ app.delete("/products/:id", (req: Request, res: Response) => {
 // ## Edit User by id
 //- validar que o usuário existe
 //- validar o body
-app.put("/users/:id", (req: Request, res: Response) => {
+app.put("/users/:id", async (req: Request, res: Response) => {
 
     try {
         const id = req.params.id
@@ -501,32 +520,43 @@ app.put("/users/:id", (req: Request, res: Response) => {
             throw new Error("O id deve inicar com 'u'")
         }
 
-        const { email, password } = req.body
+        const { name, email, password } = req.body
 
         const editUser = {
+            name, 
             email,
             password
         }
 
-        const user = users.find((user) => {
-            return user.id === id
-        })
+        // const user = users.find((user) => {
+        //     return user.id === id
+        // })
 
-        if (!user) {
-            res.status(400)
-            throw new Error("Usuário não cadastrado.")
-        }
+        const [user] = await db.raw(`
+            SELECT * FROM users
+            WHERE id = "${id}"
+        `)
 
-        if (typeof email !== "string" &&
+        if (typeof name !== "string" &&
+            typeof email !== "string" &&
             typeof password !== "string") {
             res.status(400)
             throw new Error("'email' e 'password' devem ser uma string.")
         }
 
-
         if (user) {
-            user.email = editUser.email || user.email
-            user.password = editUser.password || user.password
+            await db.raw(`
+            UPDATE users
+            SET 
+                name =  "${editUser.name || user.name}",
+                email = "${editUser.email || user.email}",
+                password = "${editUser.password || user.password}"
+            WHERE id = "${id}"
+            `)
+            
+        }else{
+            res.status(400)
+            throw new Error("Usuário não cadastrado.")
         }
 
         res.status(200).send("Cadastro atualizado com sucesso")
