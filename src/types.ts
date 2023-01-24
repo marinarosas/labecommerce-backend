@@ -20,8 +20,7 @@ export type TProduct = {
 }
 
 export type TPurchase ={
-    userId: string,
-    productId: string,
-    quantity: number,
-    totalPrice: number
+    id: string,
+    buyer: string,
+    total_price: number
 }

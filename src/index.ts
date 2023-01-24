@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { products, users, purchase } from "./database"
 // import { TProduct, TUsers, TPurchase, PRODUCT_CATEGORY } from './types'
-import {db} from './database/knex'
+import { db } from './database/knex'
 
 console.log('Hello world!')
 
@@ -135,7 +135,7 @@ app.post("/users", async (req: Request, res: Response) => {
             throw new Error("Faltou escrever o Id, name, email ou password.")
         }
 
-        if(id[0] !== "u"){
+        if (id[0] !== "u") {
             res.status(400)
             throw new Error("O id deve iniciar com a letra 'u'")
         }
@@ -178,10 +178,10 @@ app.post("/users", async (req: Request, res: Response) => {
             await db.raw(`INSERT INTO users (id, name, email, password)
             VALUES
             ('${newUser.id}', '${newUser.name}', '${newUser.email}', '${newUser.password}')`)
-            
+
             users.push(newUser)
             res.status(201).send("Cadastro realizado com sucesso")
-        } else{
+        } else {
             res.status(400)
             throw new Error("Id ou email já cadastrado.")
         }
@@ -283,62 +283,53 @@ app.post("/products", async (req: Request, res: Response) => {
 })
 
 // ## Create Purchase
-//- validar o body
-//- extra:
-//- id do usuário que fez a compra deve existir no array de usuários cadastrados
-//- id do produto que foi comprado deve existir no array de produtos cadastrados
-//- a quantidade e o total da compra devem estar com o cálculo correto
-app.post("/purchases", (req: Request, res: Response) => {
+// - method HTTP (POST)
+// - path ("/purchases")
+// - body
+//     - id
+//     - buyer
+//     - totalPrice
+//     - createdAt
+//     - paid
+
+// - response
+//     - status 201
+//     - "Compra cadastrada com sucesso"
+app.post("/purchases", async (req: Request, res: Response) => {
 
     try {
-        const { userId, productId, quantity } = req.body
+        const { id, buyer, total_price } = req.body
 
         const newPurchase = {
-            userId,
-            productId,
-            quantity,
-            totalPrice: 0
+            id,
+            buyer,
+            total_price
         }
 
-        if (!userId || !productId || !quantity) {
+        if (!id || !buyer || !total_price) {
             res.status(400)
-            throw new Error("Falta adicionar userId, productId, quantity ou totalPrice.")
+            throw new Error("Falta adicionar id, buyer ou total_price.")
         }
 
-        if (typeof userId !== "string" &&
-            typeof productId !== "string" &&
-            typeof quantity !== "number") {
+        if (typeof id !== "string" &&
+            typeof buyer !== "string" &&
+            typeof total_price !== "number") {
             res.status(400)
-            throw new Error("'userId' e 'productId' são string e 'quantity' e 'totalPrice' são tipo number.")
+            throw new Error("'userId' e 'productId' são string e 'total_price' são tipo number.")
         }
+  
+        const [findPurchase] = await db.raw(`
+            SELECT * FROM purchases
+            WHERE id = "${newPurchase.id}"
+        `)
 
-        const findPurchaseUser = users.find((user) => {
-            return user.id === newPurchase.userId
-        })
-
-        const findPurchaseProduct = products.find((product) => {
-            return product.id === newPurchase.productId
-        })
-
-        if (!findPurchaseUser) {
+        if (findPurchase) {
+            await db.raw(`
+            INSERT INTO purchases(id, buyer, total_price)
+            VALUES ('${newPurchase.id}', '${newPurchase.buyer}', ${newPurchase.total_price}`)
+        } else {
             res.status(400)
-            throw new Error("Usuário não cadastro.")
-        }
-
-        if (!findPurchaseProduct) {
-            res.status(400)
-            throw new Error("Produto não cadastrado.")
-        }
-
-
-        if(findPurchaseProduct){
-            const totalPrice = findPurchaseProduct.price * newPurchase.quantity
-            newPurchase["totalPrice"] = totalPrice
-            // const verifyPriceProduct = findPurchaseProduct.price * newPurchase.quantity === newPurchase.totalPrice
-            // if(!verifyPriceProduct){
-            //     res.status(400)
-            //     throw new Error("O total não está correto.")
-            // }
+            throw new Error("Compra não realizada.")
         }
 
         purchase.push(newPurchase)
@@ -505,14 +496,14 @@ app.put("/users/:id", (req: Request, res: Response) => {
     try {
         const id = req.params.id
 
-        if(id[0] !== "u"){
+        if (id[0] !== "u") {
             res.status(400)
             throw new Error("O id deve inicar com 'u'")
         }
 
-        const {email, password} = req.body
+        const { email, password } = req.body
 
-        const editUser ={
+        const editUser = {
             email,
             password
         }
@@ -521,18 +512,18 @@ app.put("/users/:id", (req: Request, res: Response) => {
             return user.id === id
         })
 
-        if(!user){
+        if (!user) {
             res.status(400)
             throw new Error("Usuário não cadastrado.")
         }
 
-        if(typeof email !== "string" &&
-        typeof password !== "string"){
+        if (typeof email !== "string" &&
+            typeof password !== "string") {
             res.status(400)
             throw new Error("'email' e 'password' devem ser uma string.")
         }
 
-        
+
         if (user) {
             user.email = editUser.email || user.email
             user.password = editUser.password || user.password
@@ -563,7 +554,7 @@ app.put("/products/:id", (req: Request, res: Response) => {
             throw new Error("O id precisa iniciar com a letra 'p'")
         }
 
-        const { name, price,  } = req.body
+        const { name, price, } = req.body
 
         const editProduct = {
             name,
