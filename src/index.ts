@@ -160,29 +160,39 @@ app.post("/users", async (req: Request, res: Response) => {
             throw new Error("O tipo do password é uma string")
         }
 
-        const searchId = users.find((user) => {
-            return user.id === newUser.id
-        })
+        // const searchId = users.find((user) => {
+        //     return user.id === newUser.id
+        // })
 
-        const searchEmail = users.find((user) => {
-            return user.email === newUser.email
-        })
+        const [searchIdUser] = await db.raw(
+            `SELECT * FROM users
+            WHERE id = "${newUser.id}"`
+        )
 
-        if (searchId || searchEmail) {
-            res.status(400)
-            throw new Error("Id ou email já cadastrado.")
-        }
+        // const searchEmail = users.find((user) => {
+        //     return user.email === newUser.email
+        // })
+
+        // const [searchEmail] = await db.raw(
+        //     `SELECT * FROM users
+        //     WHERE email = ${newUser.email}`
+        // )
 
         if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
             throw new Error("Parâmetro 'email' inválido")
         }
 
-        await db.raw(`INSERT INTO users (id, name, email, password)
-        VALUES
-        ('${newUser.id}', '${newUser.name}', '${newUser.email}', '${newUser.password}')`)
-        
-        users.push(newUser)
-        res.status(201).send("Cadastro realizado com sucesso")
+        if (!searchIdUser) {
+            await db.raw(`INSERT INTO users (id, name, email, password)
+            VALUES
+            ('${newUser.id}', '${newUser.name}', '${newUser.email}', '${newUser.password}')`)
+            
+            users.push(newUser)
+            res.status(201).send("Cadastro realizado com sucesso")
+        } else{
+            res.status(400)
+            throw new Error("Id já cadastrado.")
+        }
 
     } catch (error: any) {
         console.log(error)
@@ -195,70 +205,82 @@ app.post("/users", async (req: Request, res: Response) => {
 })
 
 // ## Create Product
-//- validar o body
-//- extra:
-//- não deve ser possível criar mais de um produto com a mesma id
+// - method HTTP (POST)
+// - path ("/products")
+// - body
+//     - id
+//     - name
+//     - price
+//     - description
+//     - imageUrl
+// - response
+//     - status 201
+//     - "Produto cadastrado com sucesso"
 
-app.post("/products", (req: Request, res: Response) => {
+// app.post("/products", (req: Request, res: Response) => {
 
-    try {
-        const { id, name, price, category } = req.body
+//     try {
+//         const { id, name, price, description, image_url } = req.body
 
-        const newProduct = {
-            id,
-            name,
-            price,
-            category
-        }
+//         const newProduct = {
+//             id,
+//             name,
+//             price,
+//             description,
+//             image_url
+//         }
 
-        if (!id || !name || !price || !category) {
-            res.status(404)
-            throw new Error("Id, name, price ou category faltando.")
-        }
+//         if (!id || !name || !price || !description || !image_url) {
+//             res.status(404)
+//             throw new Error("Id, name, price, description ou image_url faltando.")
+//         }
 
-        if (typeof id !== "string") {
-            res.status(400)
-            throw new Error("O tipo da id é uma string.")
-        }
+//         if (typeof id !== "string") {
+//             res.status(400)
+//             throw new Error("O tipo da id é uma string.")
+//         }
 
-        if (typeof name !== "string") {
-            res.status(400)
-            throw new Error("o tipo do nome é uma string.")
-        }
+//         if (typeof name !== "string") {
+//             res.status(400)
+//             throw new Error("o tipo do nome é uma string.")
+//         }
 
-        if (typeof price !== "number") {
-            res.status(400)
-            throw new Error("O tipo do price é um número.")
-        }
+//         if (typeof price !== "number") {
+//             res.status(400)
+//             throw new Error("O tipo do price é um número.")
+//         }
 
-        if (newProduct.category !== PRODUCT_CATEGORY.ACCESSORIES &&
-            newProduct.category !== PRODUCT_CATEGORY.CLOTHES_AND_SHOES &&
-            newProduct.category !== PRODUCT_CATEGORY.ELECTRONICS) {
-            res.status(400)
-            throw new Error("o 'type' tem que ser: 'Acessórios', 'Roupas e calçados' ou 'Eletrônicos'.")
-        }
+//         if (typeof description !== "string") {
+//             res.status(400)
+//             throw new Error("O tipo da descrição é uma string.")
+//         }
 
-        const searchProductById = products.find((product) => {
-            return product.id === newProduct.id
-        })
+//         if (typeof image_url !== "string") {
+//             res.status(400)
+//             throw new Error("O tipo do endereço (url) da imagem é uma string.")
+//         }
 
-        if (searchProductById) {
-            res.status(400)
-            throw new Error("Id já está cadastrado.")
-        }
+//         const searchProductById = products.find((product) => {
+//             return product.id === newProduct.id
+//         })
 
-        products.push(newProduct)
-        res.status(201).send("Produto cadastrado com sucesso")
+//         if (searchProductById) {
+//             res.status(400)
+//             throw new Error("Id já está cadastrado.")
+//         }
 
-    } catch (error: any) {
-        console.log(error)
+//         products.push(newProduct)
+//         res.status(201).send("Produto cadastrado com sucesso")
 
-        if (res.statusCode === 200) {
-            res.status(500)
-        }
-        res.send(error.message)
-    }
-})
+//     } catch (error: any) {
+//         console.log(error)
+
+//         if (res.statusCode === 200) {
+//             res.status(500)
+//         }
+//         res.send(error.message)
+//     }
+// })
 
 // ## Create Purchase
 //- validar o body
