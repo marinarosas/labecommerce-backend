@@ -107,24 +107,33 @@ app.get("/products/search", async (req: Request, res: Response) => {
 })
 
 // ## Create User
-// - validar o body
-// - extra:
-//     - não deve ser possível criar mais de uma conta com a mesma id
-//     - não deve ser possível criar mais de uma conta com o mesmo e-mail
-app.post("/users", (req: Request, res: Response) => {
+// - method HTTP (POST)
+// - path ("/users")
+// - body
+//     - id
+//     - name
+//     - email
+//     - password
+//     - createdAt
+// - response
+//     - status 201
+//     - "Cadastro realizado com sucesso"
+app.post("/users", async (req: Request, res: Response) => {
 
     try {
-        const { id, email, password } = req.body
+        const { id, name, email, password, createdAt } = req.body
 
         const newUser = {
             id,
+            name,
             email,
-            password
+            password,
+            createdAt
         }
 
-        if (!id || !email || !password) {
+        if (!id || !name || !email || !password) {
             res.status(404)
-            throw new Error("Faltou escrever o Id, email ou password.")
+            throw new Error("Faltou escrever o Id, name, email ou password.")
         }
 
         if(id[0] !== "u"){
@@ -135,6 +144,11 @@ app.post("/users", (req: Request, res: Response) => {
         if (typeof id !== "string") {
             res.status(400)
             throw new Error("O tipo da Id deve ser uma string")
+        }
+
+        if (typeof name !== "string") {
+            res.status(400)
+            throw new Error("O tipo da name deve ser uma string")
         }
 
         if (typeof email !== "string") {
@@ -164,6 +178,9 @@ app.post("/users", (req: Request, res: Response) => {
             throw new Error("Parâmetro 'email' inválido")
         }
 
+        await db.raw(`INSERT INTO users (id, name, email, password)
+        VALUES ('${newUser.id}, '${newUser.name}', '${newUser.email}', '${newUser.password}'`)
+        
         users.push(newUser)
         res.status(201).send("Cadastro realizado com sucesso")
 
