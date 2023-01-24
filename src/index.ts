@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { products, users, purchase } from "./database"
 import { TProduct, TUsers, TPurchase, PRODUCT_CATEGORY } from './types'
+import {db} from './database/knex'
 
 console.log('Hello world!')
 
@@ -23,11 +24,17 @@ app.get('/ping', (req: Request, res: Response) => {
 })
 
 // ## Get All Users
-//- não precisa de validação, basta refatorar para o uso do try/catch
-app.get("/users", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/users")
+// - response
+//     - status 200
+//     - array de users do arquivo .db
+app.get("/users", async (req: Request, res: Response) => {
 
     try {
-        res.status(200).send(users)
+
+        const result = await db.raw(`SELECT * FROM users`)
+        res.status(200).send(result)
 
     } catch (error: any) {
         console.log(error)
@@ -39,11 +46,17 @@ app.get("/users", (req: Request, res: Response) => {
 })
 
 // ## Get All Products
-//- não precisa de validação, basta refatorar para o uso do try/catch
-app.get("/products", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/products")
+// - response
+//     - status 200
+//     - array de products do arquivo .db
+app.get("/products", async (req: Request, res: Response) => {
 
     try {
-        res.status(200).send(products)
+
+        const results = await db.raw(`SELECT * FROM products`)
+        res.status(200).send(results)
 
     } catch (error: any) {
         console.log(error)
@@ -56,14 +69,19 @@ app.get("/products", (req: Request, res: Response) => {
 })
 
 // ## Search Product by name
-//- query params deve possuir pelo menos um caractere
-app.get("/products/search", (req: Request, res: Response) => {
+// - method HTTP (GET)
+// - path ("/product/search")
+// - query params
+//     - q
+// - response
+//     - status 200
+//     - array do resultado da busca no arquivo .db
+app.get("/products/search", async (req: Request, res: Response) => {
 
     try {
         const q = req.query.q as string
-        const results = products.filter((product) => {
-            return product.name.toLowerCase().includes(q.toLowerCase())
-        })
+        const results = await db.raw(`SELECT * FROM products
+        WHERE name LIKE '${q}';`)
 
         if (q.length < 1) {
             res.status(400)
@@ -89,24 +107,33 @@ app.get("/products/search", (req: Request, res: Response) => {
 })
 
 // ## Create User
-// - validar o body
-// - extra:
-//     - não deve ser possível criar mais de uma conta com a mesma id
-//     - não deve ser possível criar mais de uma conta com o mesmo e-mail
-app.post("/users", (req: Request, res: Response) => {
+// - method HTTP (POST)
+// - path ("/users")
+// - body
+//     - id
+//     - name
+//     - email
+//     - password
+//     - createdAt
+// - response
+//     - status 201
+//     - "Cadastro realizado com sucesso"
+app.post("/users", async (req: Request, res: Response) => {
 
     try {
-        const { id, email, password } = req.body
+        const { id, name, email, password, createdAt } = req.body
 
         const newUser = {
             id,
+            name,
             email,
-            password
+            password,
+            createdAt
         }
 
-        if (!id || !email || !password) {
+        if (!id || !name || !email || !password) {
             res.status(404)
-            throw new Error("Faltou escrever o Id, email ou password.")
+            throw new Error("Faltou escrever o Id, name, email ou password.")
         }
 
         if(id[0] !== "u"){
@@ -117,6 +144,11 @@ app.post("/users", (req: Request, res: Response) => {
         if (typeof id !== "string") {
             res.status(400)
             throw new Error("O tipo da Id deve ser uma string")
+        }
+
+        if (typeof name !== "string") {
+            res.status(400)
+            throw new Error("O tipo da name deve ser uma string")
         }
 
         if (typeof email !== "string") {
@@ -146,6 +178,9 @@ app.post("/users", (req: Request, res: Response) => {
             throw new Error("Parâmetro 'email' inválido")
         }
 
+        await db.raw(`INSERT INTO users (id, name, email, password)
+        VALUES ('${newUser.id}, '${newUser.name}', '${newUser.email}', '${newUser.password}'`)
+        
         users.push(newUser)
         res.status(201).send("Cadastro realizado com sucesso")
 
