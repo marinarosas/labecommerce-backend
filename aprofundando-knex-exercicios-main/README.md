@@ -1,12 +1,12 @@
-# Exercício da tarde - Introdução ao Knex
+# Exercício da tarde - Aprofundando em Knex
 
 ATENÇÃO! Não forke nem clone esse repositório. Ele serve apenas como enunciado!<br><br>
 
-<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar introducao-knex.</strong>
+<strong>Continue trabalhando no seu repositório labecommerce-backend criado anteriormente. Evite trabalhar na main e crie branches para organizar cada nova implementação ou refatoração. A de hoje por exemplo, pode se chamar aprofundando-knex.</strong>
 
 ### Comando para criar a branch e já entrar nela
 ```
-git checkout -b introducao-knex
+git checkout -b aprofundando-knex
 ```
 <br>
 
@@ -20,8 +20,9 @@ git checkout -b introducao-knex
 - [Fluxo de Dados no Backend](https://github.com/labenuexercicios/fluxo-de-dados-backend-exercicios)
 - [Introdução a SQL](https://github.com/labenuexercicios/intro-sql-exercicios)
 - [Aprofundamento SQL](https://github.com/labenuexercicios/aprofundamento-sql-exercicios)
-- [Relações em SQL I](https://github.com/labenuexercicios/relacoes-sql-I-exercicios)
-- [Relações em SQL II](https://github.com/labenuexercicios/relacoes-sql-II-exercicios)
+- [Relações em SQL I](https://github.com/labenuexercicios/relacoes-sql-I)
+- [Relações em SQL II](https://github.com/labenuexercicios/relacoes-sql-II)
+- [Introdução ao Knex](https://github.com/labenuexercicios/introducao-knex-exercicios)
 
 
 
