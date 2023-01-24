@@ -121,14 +121,13 @@ app.get("/products/search", async (req: Request, res: Response) => {
 app.post("/users", async (req: Request, res: Response) => {
 
     try {
-        const { id, name, email, password, createdAt } = req.body
+        const { id, name, email, password } = req.body
 
         const newUser = {
             id,
             name,
             email,
-            password,
-            createdAt
+            password
         }
 
         if (!id || !name || !email || !password) {
@@ -179,7 +178,8 @@ app.post("/users", async (req: Request, res: Response) => {
         }
 
         await db.raw(`INSERT INTO users (id, name, email, password)
-        VALUES ('${newUser.id}, '${newUser.name}', '${newUser.email}', '${newUser.password}'`)
+        VALUES
+        ('${newUser.id}', '${newUser.name}', '${newUser.email}', '${newUser.password}')`)
         
         users.push(newUser)
         res.status(201).send("Cadastro realizado com sucesso")
