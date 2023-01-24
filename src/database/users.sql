@@ -14,6 +14,8 @@ CREATE TABLE users (
     created_at TEXT DEFAULT(DATETIME()) NOT NULL
 );
 
+DROP TABLE users;
+
 -- ## Get All Users
 SELECT * FROM users;
 

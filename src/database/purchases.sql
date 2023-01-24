@@ -17,6 +17,8 @@ CREATE TABLE purchases(
     FOREIGN KEY (buyer) REFERENCES users(id)
 );
 
+DROP TABLE purchases;
+
 SELECT * FROM purchases;
 DROP TABLE purchases;
 

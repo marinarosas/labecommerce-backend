@@ -15,6 +15,8 @@ CREATE TABLE products(
     image_url TEXT NOT NULL
 );
 
+DROP TABLE products;
+
 --## Get All Products
 SELECT * FROM products;
 

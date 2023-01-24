@@ -1,14 +1,8 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
-// import { products, users, purchase } from "./database"
-// import { TProduct, TUsers, TPurchase, PRODUCT_CATEGORY } from './types'
 import { db } from './database/knex'
 
 console.log('Hello world!')
-
-// console.table(users)
-// console.table(products)
-// console.table(purchase)
 
 const app = express()
 
@@ -23,17 +17,15 @@ app.get('/ping', (req: Request, res: Response) => {
     res.send('Pong!')
 })
 
+
+//############ USERS ############
+
 // ## Get All Users
-// - method HTTP (GET)
-// - path ("/users")
-// - response
-//     - status 200
-//     - array de users do arquivo .db
 app.get("/users", async (req: Request, res: Response) => {
 
     try {
 
-        const result = await db.raw(`SELECT * FROM users`)
+        const result = await db('users')
         res.status(200).send(result)
 
     } catch (error: any) {
