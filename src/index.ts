@@ -107,20 +107,82 @@ app.post("/users", async (req: Request, res: Response) => {
     }
 })
 
+// ## Delete User by id
+app.delete("/users/:id", async (req: Request, res: Response) => {
 
+    try {
+        const id = req.params.id
 
+        const [userExist] = await db("users").where({id: id})
 
+        if (userExist) {
+            await db("users").del().where({id: id})
+            res.status(200).send({ message: "Usuário apagado com sucesso"})
 
+        } else {
+            res.status(400)
+            throw new Error("Usuário não existe")
+        }
 
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
+    }
+})
 
+// ## Edit User by id
+app.put("/users/:id", async (req: Request, res: Response) => {
 
+    try {
+        const id = req.params.id
 
+        const [user] = await db("users").where({id: id})
 
+        if (id[0] !== "u") {
+            res.status(400)
+            throw new Error("O id deve inicar com 'u'")
+        }
 
+        const newName = req.body.name
+        const newEmail = req.body.email
+        const newPassword = req.body.password
 
+        const editUser = {
+            name: newName || user.name,
+            email: newEmail || user.email,
+            password: newPassword || user.password
+        }
 
+        
+        if (typeof newName !== "string" &&
+            typeof newEmail !== "string" &&
+            typeof newPassword !== "string") {
+            res.status(400)
+            throw new Error("'email' e 'password' devem ser uma string.")
+        }
 
+        if (user) {
 
+            await db("users").update(editUser).where({id:id})
+
+        } else {
+            res.status(400)
+            throw new Error("Usuário não cadastrado.")
+        }
+
+        res.status(200).send({ message: "Cadastro atualizado com sucesso"})
+
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
+    }
+})
 
 //############ PRODUCTS ############
 
@@ -237,26 +299,6 @@ app.get("/products/search", async (req: Request, res: Response) => {
 
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ## Edit Product by id
 app.put("/products/:id", async (req: Request, res: Response) => {
 
@@ -302,7 +344,7 @@ app.put("/products/:id", async (req: Request, res: Response) => {
         if (product) {
             await db("products").update(editProduct).where({ id: idToEdit})
         
-            res.status(200).send("Produto atualizado com sucesso")
+            res.status(200).send({ message: "Produto atualizado com sucesso"})
 
         }
 
@@ -315,40 +357,6 @@ app.put("/products/:id", async (req: Request, res: Response) => {
     }
 
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ## Get Products by id
 app.get("/products/:id", async (req: Request, res: Response) => {
@@ -380,14 +388,32 @@ app.get("/products/:id", async (req: Request, res: Response) => {
 
 })
 
+// ## Delete Product by id
+app.delete("/products/:id", async (req: Request, res: Response) => {
 
+    try {
+        const id = req.params.id
 
+        const productDelete = await db("products").where({ id: id})
+        
+        if (productDelete) {
+            await db("products").del().where({id: id})
+            res.status(200).send({message: "Produto apagado com sucesso"})
 
+        } else {
+            res.status(400)
+            throw new Error("Produto não existe")
+        }
 
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
+    }
 
-
-
-
+})
 
 //############ PURCHASE ############
 
@@ -396,45 +422,70 @@ app.post("/purchases", async (req: Request, res: Response) => {
 
     try {
 
-        const { id, buyer, productId, quantity } = req.body
+        const newIdPurchase = req.body.id
+        const newBuyer = req.body.buyer
+        const newProducts = req.body.products //---ISSO É UM ARRAYYYYYYYYYYYY
 
-        const [products] = await db("products").where({id: productId})
-        
-        if (!id || !buyer || !productId) {
+        const {productId, quantity} = newProducts
+
+        const [idExist] = await db("purchases").where({id: newIdPurchase})
+
+        if(idExist){
             res.status(400)
-            throw new Error("Falta adicionar id ou buyer.")
+            throw new Error("Id já cadastrado")
         }
 
-        if (typeof id !== "string" &&
-            typeof buyer !== "string") {
+        if(newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r"){
             res.status(400)
-            throw new Error("'userId' e 'productId' são string e 'totalPrice' são tipo number.")
+            throw new Error("O id deve iniciar com 'pr'")
         }
 
-        const newPurchase = {
-            id,
-            buyer,
-            total_price: products.price * quantity
-        }
-        
-        const newPurchaseProduct = {
-            purchase_id: id,
-            product_id: productId,
-            quantity
-        }
-        const [findUser] = await db("users").where({id: newPurchase.buyer})
-
-        if (findUser) {
-            await db("purchases").insert(newPurchase)
-            await db("purchases_products").insert(newPurchaseProduct)
-        } else {
+        if (!newIdPurchase || !newBuyer|| !newProducts) {
             res.status(400)
-            throw new Error("Compra não realizada.")
+            throw new Error("Falta adicionar id, buyer e produtos.")
+        }
+
+        if (typeof newIdPurchase !== "string" &&
+            typeof newBuyer !== "string") {
+            res.status(400)
+            throw new Error("'userId' e 'productId' são string.")
+        }
+
+        let newPriceTotal = 0
+
+        const bodyPurchase = {
+            id: newIdPurchase,
+            buyer: newBuyer,
+            total_price: newPriceTotal
+        }
+
+        await db("purchases").insert(bodyPurchase)
+
+        const products = []
+
+        for(let item of newProducts){
+            const [addItem] = await db("products").where({ id: item.id})
+            newPriceTotal += addItem.price * item.quantity
+            await db("purchases_products").insert({purchase_id: newIdPurchase , product_id: item.id, quantity: item.quantity})
+            const completeProduct = {
+                ...addItem,
+                quantity
+            }
+            products.push(completeProduct)
+        }
+
+        await db("purchases").update({total_price: newPriceTotal}).where({ id: newIdPurchase})
+
+        const result = {
+            id: bodyPurchase.id,
+            buyer: bodyPurchase.buyer,
+            totalPrice: newPriceTotal,
+            products
         }
 
         res.status(201).send({ 
-            message: "Compra realizado com sucesso",
-            purchase: {newPurchase, newPurchaseProduct}
+            message: "Pedido realizado com sucesso",
+            purchase: result
         })
 
     } catch (error: any) {
@@ -446,7 +497,90 @@ app.post("/purchases", async (req: Request, res: Response) => {
     }
 })
 
-app.get("/purchases_products", async (req: Request, res: Response) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//##deletePurchaseById
+app.delete("/products/:id", async (req: Request, res: Response) => {
+
+    try {
+        const id = req.params.id
+
+        const productDelete = await db.raw(`
+            SELECT FROM products
+            WHERE id = '${id}'
+        `)
+
+        if (productDelete) {
+            await db.raw(`
+            DELETE FROM products
+            WHERE id = '${id}'
+            `)
+            res.status(200).send("Produto apagado com sucesso")
+
+        } else {
+            res.status(400)
+            throw new Error("Produto não existe")
+        }
+
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
+    }
+
+})
+
+//getPurchaseById
+app.get("/purchases/:id", async (req: Request, res: Response) => {
 
     try {
         const idUser = req.params.id
@@ -487,11 +621,6 @@ app.get("/purchases_products", async (req: Request, res: Response) => {
 })
 
 // ## Get User Purchases by User id
-// - method HTTP (GET)
-// - path ("/users/:id/purchases")
-// - response
-//     - status 200
-//     - array de compras do user no arquivo .db
 app.get("/users/:id/purchases", async (req: Request, res: Response) => {
 
     try {
@@ -532,138 +661,92 @@ app.get("/users/:id/purchases", async (req: Request, res: Response) => {
     }
 })
 
-// ## Delete User by id
-//- validar que o usuário existe
-app.delete("/users/:id", async (req: Request, res: Response) => {
 
-    try {
-        const id = req.params.id
 
-        // const userDelete = users.findIndex((user) => {
-        //     return user.id === id
-        // })
 
-        const [userExist] = await db.raw(`
-            SELECT * FROM user
-            WHERE id= "${id}"
-        `)
 
-        if (userExist) {
-            await db.raw(`
-            DELETE FROM users
-            WHERE id = '${id}'
-            `)
 
-            res.status(200).send("Usuário apagado com sucesso")
 
-        } else {
-            res.status(400)
-            throw new Error("Usuário não existe")
-        }
 
-    } catch (error: any) {
-        console.log(error)
-        if (res.statusCode === 200) {
-            res.status(500)
-        }
-        res.send(error.message)
-    }
-})
 
-// ## Delete Product by id
-//- validar que o produto existe
-app.delete("/products/:id", async (req: Request, res: Response) => {
 
-    try {
-        const id = req.params.id
 
-        const productDelete = await db.raw(`
-            SELECT FROM products
-            WHERE id = '${id}'
-        `)
 
-        if (productDelete) {
-            await db.raw(`
-            DELETE FROM products
-            WHERE id = '${id}'
-            `)
-            res.status(200).send("Produto apagado com sucesso")
 
-        } else {
-            res.status(400)
-            throw new Error("Produto não existe")
-        }
 
-    } catch (error: any) {
-        console.log(error)
-        if (res.statusCode === 200) {
-            res.status(500)
-        }
-        res.send(error.message)
-    }
 
-})
 
-// ## Edit User by id
-//- validar que o usuário existe
-//- validar o body
-app.put("/users/:id", async (req: Request, res: Response) => {
 
-    try {
-        const id = req.params.id
 
-        if (id[0] !== "u") {
-            res.status(400)
-            throw new Error("O id deve inicar com 'u'")
-        }
 
-        const { name, email, password } = req.body
 
-        const editUser = {
-            name,
-            email,
-            password
-        }
 
-        // const user = users.find((user) => {
-        //     return user.id === id
-        // })
 
-        const [user] = await db.raw(`
-            SELECT * FROM users
-            WHERE id = "${id}"
-        `)
 
-        if (typeof name !== "string" &&
-            typeof email !== "string" &&
-            typeof password !== "string") {
-            res.status(400)
-            throw new Error("'email' e 'password' devem ser uma string.")
-        }
 
-        if (user) {
-            await db.raw(`
-            UPDATE users
-            SET 
-                name =  "${editUser.name || user.name}",
-                email = "${editUser.email || user.email}",
-                password = "${editUser.password || user.password}"
-            WHERE id = "${id}"
-            `)
 
-        } else {
-            res.status(400)
-            throw new Error("Usuário não cadastrado.")
-        }
 
-        res.status(200).send("Cadastro atualizado com sucesso")
 
-    } catch (error: any) {
-        console.log(error)
-        if (res.statusCode === 200) {
-            res.status(500)
-        }
-        res.send(error.message)
-    }
-})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// //get
+// app.get("/purchases_products", async (req: Request, res: Response) => {
+
+//     try {
+//         const idUser = req.params.id
+
+//         if (idUser[0] !== "u") {
+//             res.status(400)
+//             throw new Error("Faltou inicar o Id do usuário com 'u'")
+//         }
+
+//         const [userFind] = await db("users").where({id: idUser})
+        
+//         if (!userFind) {
+//             res.status(400)
+//             throw new Error("Não existe o usuário")
+//         }
+
+//         if (userFind) {
+
+//             const purchaseFind = await db("purchases").where({buyer: idUser})
+
+//             if (purchaseFind.length < 1) {
+//                 res.status(400)
+//                 throw new Error("Não existe compra cadastrado nesse usuário")
+//             }
+
+//             if (purchaseFind) {
+//                 res.status(200).send(purchaseFind)
+//             }
+//         }
+
+//     } catch (error: any) {
+//         console.log(error)
+//         if (res.statusCode === 200) {
+//             res.status(500)
+//         }
+//         res.send(error.message)
+//     }
+// })
+
+
+
+
+
+
+
 
