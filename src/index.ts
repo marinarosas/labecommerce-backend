@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './database/knex'
-import {TUsers} from '../src/types'
+import { TUsers } from '../src/types'
 
 console.log('Hello world!')
 
@@ -40,14 +40,14 @@ app.post("/users", async (req: Request, res: Response) => {
             throw new Error("Faltou escrever o Id, name, email ou password.")
         }
 
-        if (id[0] !== "u") {
-            res.status(400)
-            throw new Error("O id deve iniciar com a letra 'u'")
-        }
-
         if (typeof id !== "string") {
             res.status(400)
             throw new Error("O tipo da Id deve ser uma string")
+        }
+
+        if (id[0] !== "u") {
+            res.status(400)
+            throw new Error("O id deve iniciar com a letra 'u'")
         }
 
         if (typeof name !== "string") {
@@ -65,27 +65,31 @@ app.post("/users", async (req: Request, res: Response) => {
             throw new Error("O tipo do password é uma string")
         }
 
-        const [searchIdUser]: TUsers[] = await db("users").where({id: newUser.id})
+        const [searchIdUser]: TUsers[] = await db("users").where({ id: newUser.id })
 
-        const [searchEmail]: TUsers[]  = await db("users").where({email: newUser.email})
+        const [searchEmail]: TUsers[] = await db("users").where({ email: newUser.email })
 
-        if(searchIdUser || searchEmail){
+        if (searchIdUser) {
             res.status(400)
-            throw new Error("Id ou email já cadastrado.")
-        } else {
-            if (!email.match(regexEmail)) {
-                throw new Error("Parâmetro 'email' inválido")
-            }
-
-            if (!searchIdUser || !searchEmail) {
-                await db("users").insert(newUser)
-                res.status(201).send({ message: "Cadastro realizado com sucesso"})
-            }
+            throw new Error("Id já cadastrado.")
         }
 
-        if(!password.match(regexPassword)){
+        if (searchEmail) {
+            res.status(400)
+            throw new Error("Email já cadastrado.")
+        }
+        if (!email.match(regexEmail)) {
+            throw new Error("Parâmetro 'email' inválido")
+        }
+
+        if (!password.match(regexPassword)) {
             res.status(400)
             throw new Error("'password' deve possuir entre 8 e 12 caracteres, com letras maiúsculas e minúsculas e no mínimo um número e um caractere especial")
+        }
+
+        if (!searchIdUser || !searchEmail) {
+            await db("users").insert(newUser)
+            res.status(201).send({ message: "Cadastro realizado com sucesso" })
         }
 
     } catch (error: any) {
@@ -120,7 +124,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
     try {
         const id = req.params.id
 
-        const [user] = await db("users").where({id: id})
+        const [user] = await db("users").where({ id: id })
 
         if (id[0] !== "u") {
             res.status(400)
@@ -137,7 +141,7 @@ app.put("/users/:id", async (req: Request, res: Response) => {
             password: newPassword || user.password
         }
 
-        
+
         if (typeof newName !== "string" &&
             typeof newEmail !== "string" &&
             typeof newPassword !== "string") {
@@ -147,14 +151,14 @@ app.put("/users/:id", async (req: Request, res: Response) => {
 
         if (user) {
 
-            await db("users").update(editUser).where({id:id})
+            await db("users").update(editUser).where({ id: id })
 
         } else {
             res.status(400)
             throw new Error("Usuário não cadastrado.")
         }
 
-        res.status(200).send({ message: "Cadastro atualizado com sucesso"})
+        res.status(200).send({ message: "Cadastro atualizado com sucesso" })
 
     } catch (error: any) {
         console.log(error)
@@ -171,21 +175,21 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
     try {
         const id = req.params.id
 
-        const [userExist] = await db("users").where({id: id})
+        const [userExist] = await db("users").where({ id: id })
 
-        const [userHavePurchase] = await db("purchases").where({buyer: id})
-        
+        const [userHavePurchase] = await db("purchases").where({ buyer: id })
+
         if (userExist) {
-            if(userHavePurchase){
-                await db("purchases").del().where({buyer: id})
-                await db("purchases_products").del().where({purchase_id: userHavePurchase.id})
-                await db("users").del().where({id: id})
+            if (userHavePurchase) {
+                await db("purchases").del().where({ buyer: id })
+                await db("purchases_products").del().where({ purchase_id: userHavePurchase.id })
+                await db("users").del().where({ id: id })
             } else {
-                await db("users").del().where({id: id})
-                
+                await db("users").del().where({ id: id })
+
             }
 
-            res.status(200).send({ message: "Usuário apagado com sucesso"})
+            res.status(200).send({ message: "Usuário apagado com sucesso" })
 
         } else {
             res.status(400)
@@ -247,7 +251,7 @@ app.post("/products", async (req: Request, res: Response) => {
             throw new Error("O tipo do endereço (url) da imagem é uma string.")
         }
 
-        const [searchProductById] = await db("products").where({id: newProduct.id})
+        const [searchProductById] = await db("products").where({ id: newProduct.id })
 
         if (!searchProductById) {
             await db("products").insert(newProduct)
@@ -256,7 +260,7 @@ app.post("/products", async (req: Request, res: Response) => {
             throw new Error("Id já está cadastrado.")
         }
 
-        res.status(201).send({ message: "Produto cadastrado com sucesso"})
+        res.status(201).send({ message: "Produto cadastrado com sucesso" })
 
     } catch (error: any) {
         console.log(error)
@@ -327,7 +331,7 @@ app.get("/products/:id", async (req: Request, res: Response) => {
             throw new Error("Faltou iniciar a Id com 'p'")
         }
 
-        const result = await db("products").where({ id: id})
+        const result = await db("products").where({ id: id })
 
         if (!result) {
             res.status(400)
@@ -364,7 +368,7 @@ app.put("/products/:id", async (req: Request, res: Response) => {
         const newDescription = req.body.description
         const newImageUrl = req.body.image_url
 
-        const [product] = await db("products").where({ id: idToEdit})
+        const [product] = await db("products").where({ id: idToEdit })
 
         const editProduct = {
             id: newId || product.id,
@@ -389,9 +393,9 @@ app.put("/products/:id", async (req: Request, res: Response) => {
         }
 
         if (product) {
-            await db("products").update(editProduct).where({ id: idToEdit})
-        
-            res.status(200).send({ message: "Produto atualizado com sucesso"})
+            await db("products").update(editProduct).where({ id: idToEdit })
+
+            res.status(200).send({ message: "Produto atualizado com sucesso" })
 
         }
 
@@ -411,11 +415,11 @@ app.delete("/products/:id", async (req: Request, res: Response) => {
     try {
         const id = req.params.id
 
-        const productDelete = await db("products").where({ id: id})
-        
+        const productDelete = await db("products").where({ id: id })
+
         if (productDelete) {
-            await db("products").del().where({id: id})
-            res.status(200).send({message: "Produto apagado com sucesso"})
+            await db("products").del().where({ id: id })
+            res.status(200).send({ message: "Produto apagado com sucesso" })
 
         } else {
             res.status(400)
@@ -443,21 +447,21 @@ app.post("/purchases", async (req: Request, res: Response) => {
         const newBuyer = req.body.buyer
         const newProducts = req.body.products //---ISSO É UM OBJETO QUE SERA INSERIDO EM UM ARRAY
 
-        const {productId, quantity} = newProducts //= purchase_products
+        const { productId, quantity } = newProducts //= purchase_products
 
-        const [idExist] = await db("purchases").where({id: newIdPurchase})
+        const [idExist] = await db("purchases").where({ id: newIdPurchase })
 
-        if(idExist){
+        if (idExist) {
             res.status(400)
             throw new Error("Id já cadastrado")
         }
 
-        if(newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r"){
+        if (newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r") {
             res.status(400)
             throw new Error("O id deve iniciar com 'pr'")
         }
 
-        if (!newIdPurchase || !newBuyer|| !newProducts) {
+        if (!newIdPurchase || !newBuyer || !newProducts) {
             res.status(400)
             throw new Error("Falta adicionar id, buyer e produtos.")
         }
@@ -476,15 +480,15 @@ app.post("/purchases", async (req: Request, res: Response) => {
             total_price: newPriceTotal// = 0
         }
 
-        await db("purchases").insert(bodyPurchase) 
+        await db("purchases").insert(bodyPurchase)
 
         const products = [] // [{},{}]
 
-        for(let item of newProducts){ // = item = {purchase_id, producst_id, quantity} --> purchases_products Tabela
-            const [addItem] = await db("products").where({ id: item.id}) // addItem = {id, name, price, description, image_Url}
+        for (let item of newProducts) { // = item = {purchase_id, producst_id, quantity} --> purchases_products Tabela
+            const [addItem] = await db("products").where({ id: item.id }) // addItem = {id, name, price, description, image_Url}
             newPriceTotal += addItem.price * item.quantity// 30 + 40 = 70
             await db("purchases_products") // tabela - purchase_id, product_id, quantity
-            .insert({purchase_id: newIdPurchase , product_id: item.id, quantity: item.quantity})
+                .insert({ purchase_id: newIdPurchase, product_id: item.id, quantity: item.quantity })
             const completeProduct = {
                 ...addItem,
                 quantity
@@ -493,8 +497,8 @@ app.post("/purchases", async (req: Request, res: Response) => {
         }
 
 
-        await db("purchases").update({total_price: newPriceTotal}).where({ id: newIdPurchase})
-        
+        await db("purchases").update({ total_price: newPriceTotal }).where({ id: newIdPurchase })
+
 
         const result = {
             id: bodyPurchase.id,
@@ -503,7 +507,7 @@ app.post("/purchases", async (req: Request, res: Response) => {
             products
         }
 
-        res.status(201).send({ 
+        res.status(201).send({
             message: "Pedido realizado com sucesso",
             purchase: result
         })
@@ -524,10 +528,10 @@ app.put("/purchases/:id", async (req: Request, res: Response) => {
         const idToEdit = req.params.id
         const newBuyer = req.body.buyer
         const newPaid = req.body.paid
-    
-        const [purchase] = await db("purchases").where({id: idToEdit})
 
-        if(!purchase){
+        const [purchase] = await db("purchases").where({ id: idToEdit })
+
+        if (!purchase) {
             res.status(400)
             throw new Error("Id não cadastrado")
         }
@@ -542,10 +546,10 @@ app.put("/purchases/:id", async (req: Request, res: Response) => {
             paid: isNaN(newPaid) ? purchase.paid : newPaid
         }
 
-        await db("purchases").update(bodyPurchase).where({id: idToEdit})
+        await db("purchases").update(bodyPurchase).where({ id: idToEdit })
 
-    
-        res.status(201).send({ 
+
+        res.status(201).send({
             message: "Pedido atualizado com sucesso",
             purchase: bodyPurchase
         })
@@ -566,7 +570,7 @@ app.get("/purchases", async (req: Request, res: Response) => {
 
         const result = await db("purchases")
 
-        res.status(201).send({ purchase: result})
+        res.status(201).send({ purchase: result })
 
     } catch (error: any) {
         console.log(error)
@@ -584,14 +588,14 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
 
         const newIdPurchase = req.params.id
 
-        const [idExist] = await db("purchases").where({id: newIdPurchase})
+        const [idExist] = await db("purchases").where({ id: newIdPurchase })
 
-        if(newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r"){
+        if (newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r") {
             res.status(400)
             throw new Error("O id deve iniciar com 'pr'")
         }
 
-        if(!idExist){
+        if (!idExist) {
             res.status(400)
             throw new Error("Id não cadastrado")
         }
@@ -606,9 +610,9 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
             throw new Error("'id'é uma string.")
         }
 
-        const [result] = await db("purchases").where({ id: newIdPurchase})
+        const [result] = await db("purchases").where({ id: newIdPurchase })
 
-        res.status(201).send({ purchase: result})
+        res.status(201).send({ purchase: result })
 
     } catch (error: any) {
         console.log(error)
@@ -625,18 +629,18 @@ app.delete("/purchases/:id", async (req: Request, res: Response) => {
     try {
         const idToDelete = req.params.id
 
-        const productDelete = await db("purchases").where({id: idToDelete})
-        const purchaseDelete = await db("purchases_products").where({purchase_id: idToDelete})
+        const productDelete = await db("purchases").where({ id: idToDelete })
+        const purchaseDelete = await db("purchases_products").where({ purchase_id: idToDelete })
 
-        if(idToDelete[0] !== "p" && idToDelete[1] !== "r"){
+        if (idToDelete[0] !== "p" && idToDelete[1] !== "r") {
             res.status(400)
             throw new Error("O id deve iniciar com 'pr'")
         }
 
         if (productDelete && purchaseDelete) {
-            await db("purchases_products").del().where({purchase_id: idToDelete})
-            await db("purchases").del().where({id: idToDelete})
-            res.status(200).send({ message: "Compra apagada com sucesso"})
+            await db("purchases_products").del().where({ purchase_id: idToDelete })
+            await db("purchases").del().where({ id: idToDelete })
+            res.status(200).send({ message: "Compra apagada com sucesso" })
 
         } else {
             res.status(400)
