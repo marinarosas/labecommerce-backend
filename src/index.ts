@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './database/knex'
+import {TUsers} from '../src/types'
 
 console.log('Hello world!')
 
@@ -17,16 +18,17 @@ app.get('/ping', (req: Request, res: Response) => {
     res.send('Pong!')
 })
 
-
+const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,12}$/g
 //############ USERS ############
 
 //##createUser
 app.post("/users", async (req: Request, res: Response) => {
 
     try {
-        const { id, name, email, password } = req.body
+        const { id, name, email, password } = req.body as TUsers
 
-        const newUser = {
+        const newUser: TUsers = {
             id,
             name,
             email,
@@ -63,15 +65,15 @@ app.post("/users", async (req: Request, res: Response) => {
             throw new Error("O tipo do password é uma string")
         }
 
-        const [searchIdUser] = await db("users").where({id: newUser.id})
+        const [searchIdUser]: TUsers[] = await db("users").where({id: newUser.id})
 
-        const [searchEmail] = await db("users").where({email: newUser.email})
+        const [searchEmail]: TUsers[]  = await db("users").where({email: newUser.email})
 
         if(searchIdUser || searchEmail){
             res.status(400)
             throw new Error("Id ou email já cadastrado.")
         } else {
-            if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
+            if (!email.match(regexEmail)) {
                 throw new Error("Parâmetro 'email' inválido")
             }
 
@@ -79,6 +81,11 @@ app.post("/users", async (req: Request, res: Response) => {
                 await db("users").insert(newUser)
                 res.status(201).send({ message: "Cadastro realizado com sucesso"})
             }
+        }
+
+        if(!password.match(regexPassword)){
+            res.status(400)
+            throw new Error("'password' deve possuir entre 8 e 12 caracteres, com letras maiúsculas e minúsculas e no mínimo um número e um caractere especial")
         }
 
     } catch (error: any) {
@@ -510,9 +517,47 @@ app.post("/purchases", async (req: Request, res: Response) => {
     }
 })
 
+//##editPurchaseById
+app.put("/purchases/:id", async (req: Request, res: Response) => {
 
+    try {
+        const idToEdit = req.params.id
+        const newBuyer = req.body.buyer
+        const newPaid = req.body.paid
+    
+        const [purchase] = await db("purchases").where({id: idToEdit})
 
+        if(!purchase){
+            res.status(400)
+            throw new Error("Id não cadastrado")
+        }
 
+        if (typeof newBuyer !== "string") {
+            res.status(400)
+            throw new Error("'userId' e 'productId' são string.")
+        }
+
+        const bodyPurchase = {
+            buyer: newBuyer || purchase.buyer,
+            paid: isNaN(newPaid) ? purchase.paid : newPaid
+        }
+
+        await db("purchases").update(bodyPurchase).where({id: idToEdit})
+
+    
+        res.status(201).send({ 
+            message: "Pedido atualizado com sucesso",
+            purchase: bodyPurchase
+        })
+
+    } catch (error: any) {
+        console.log(error)
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        res.send(error.message)
+    }
+})
 
 //##getAllPurchase
 app.get("/purchases", async (req: Request, res: Response) => {
@@ -615,61 +660,6 @@ app.delete("/purchases/:id", async (req: Request, res: Response) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//##editPurchaseById
-app.put("/purchases/:id", async (req: Request, res: Response) => {
-
-    try {
-        const idToEdit = req.params.id
-        const newBuyer = req.body.buyer
-        const newPaid = req.body.paid
-    
-        const [purchase] = await db("purchases").where({id: idToEdit})
-
-        if(!purchase){
-            res.status(400)
-            throw new Error("Id não cadastrado")
-        }
-
-        if (typeof newBuyer !== "string") {
-            res.status(400)
-            throw new Error("'userId' e 'productId' são string.")
-        }
-
-        const bodyPurchase = {
-            buyer: newBuyer || purchase.buyer,
-            paid: isNaN(newPaid) ? purchase.paid : newPaid
-        }
-
-        await db("purchases").update(bodyPurchase).where({id: idToEdit})
-
-    
-        res.status(201).send({ 
-            message: "Pedido atualizado com sucesso",
-            purchase: bodyPurchase
-        })
-
-    } catch (error: any) {
-        console.log(error)
-        if (res.statusCode === 200) {
-            res.status(500)
-        }
-        res.send(error.message)
-    }
-})
 
 
 
