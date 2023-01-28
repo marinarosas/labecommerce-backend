@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './database/knex'
-import { TUsers } from '../src/types'
+import { TUsers, TUsersEdit } from '../src/types'
 
 console.log('Hello world!')
 
@@ -106,7 +106,7 @@ app.post("/users", async (req: Request, res: Response) => {
 app.get("/users", async (req: Request, res: Response) => {
 
     try {
-        
+
         const result: TUsers = await db('users')
         res.status(200).send(result)
 
@@ -125,29 +125,45 @@ app.put("/users/:id", async (req: Request, res: Response) => {
     try {
         const id = req.params.id
 
-        const [user] = await db("users").where({ id: id })
+        const newName = req.body.name
+        const newEmail = req.body.email
+        const newPassword = req.body.password
+
+        const [user]: TUsers[] = await db("users").where({ id: id })
 
         if (id[0] !== "u") {
             res.status(400)
             throw new Error("O id deve inicar com 'u'")
         }
 
-        const newName = req.body.name
-        const newEmail = req.body.email
-        const newPassword = req.body.password
+        if (typeof newName !== "string") {
+            res.status(400)
+            throw new Error("O tipo da name deve ser uma string")
+        }
 
-        const editUser = {
+        if (typeof newEmail !== "string") {
+            res.status(400)
+            throw new Error("O tipo do e-mail deve ser uma string")
+        }
+
+        if (typeof newPassword !== "string") {
+            res.status(400)
+            throw new Error("O tipo do password é uma string")
+        }
+
+        if (!newEmail.match(regexEmail)) {
+            throw new Error("Parâmetro 'email' inválido")
+        }
+
+        if (!newPassword.match(regexPassword)) {
+            res.status(400)
+            throw new Error("'password' deve possuir entre 8 e 12 caracteres, com letras maiúsculas e minúsculas e no mínimo um número e um caractere especial")
+        }
+
+        const editUser: TUsersEdit = {
             name: newName || user.name,
             email: newEmail || user.email,
             password: newPassword || user.password
-        }
-
-
-        if (typeof newName !== "string" &&
-            typeof newEmail !== "string" &&
-            typeof newPassword !== "string") {
-            res.status(400)
-            throw new Error("'email' e 'password' devem ser uma string.")
         }
 
         if (user) {

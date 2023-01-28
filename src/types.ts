@@ -11,6 +11,12 @@ export type TUsers = {
     password: string
 }
 
+export type TUsersEdit = {
+    name: string,
+    email: string,
+    password: string
+}
+
 export type TProduct = {
     id: string,
     name: string,
