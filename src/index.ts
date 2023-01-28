@@ -383,16 +383,21 @@ app.put("/products/:id", async (req: Request, res: Response) => {
 
         const idToEdit = req.params.id
 
-        if (idToEdit[0] !== "p") {
-            res.status(400)
-            throw new Error("O id precisa iniciar com a letra 'p'")
-        }
-
         const newId = req.body.id
         const newName = req.body.name
         const newPrice = req.body.price
         const newDescription = req.body.description
         const newImageUrl = req.body.image_url
+
+        if(typeof newId != "string"){
+            res.status(400)
+            throw new Error("O 'id' deve ser uma string")
+        }
+
+        if (idToEdit[0] !== "p") {
+            res.status(400)
+            throw new Error("O id precisa iniciar com a letra 'p'")
+        }
 
         const [product] = await db("products").where({ id: idToEdit })
 
@@ -404,15 +409,31 @@ app.put("/products/:id", async (req: Request, res: Response) => {
             image_url: newImageUrl || product.image_url
         }
 
+        if (newId[0] !== "p") {
+            res.status(400)
+            throw new Error("O id precisa iniciar com a letra 'p'")
+        }
+
         if (typeof newName !== "string") {
             res.status(400)
-            throw new Error("O nome deve ser uma string.")
+            throw new Error("O 'name' deve ser uma string.")
         }
 
         if (typeof newPrice !== "number") {
             res.status(400)
-            throw new Error("O preço deve ser um número")
+            throw new Error("O 'price' deve ser um número")
         }
+
+        if(typeof newDescription !== "string"){
+            res.status(400)
+            throw new Error("A 'description' deve ser uma string")
+        }
+
+        if(typeof newImageUrl  !== "string"){
+            res.status(400)
+            throw new Error("A 'description' deve ser uma string")
+        }
+
         if (!product) {
             res.status(404)
             throw new Error("Produto não encontrado")
