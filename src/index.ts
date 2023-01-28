@@ -321,7 +321,7 @@ app.get("/products/search", async (req: Request, res: Response) => {
 
     try {
         const q = req.query.q as string
-        const results = await db('products').where("name", "LIKE", `%${q}%`)
+        const results: TProduct[] = await db('products').where("name", "LIKE", `%${q}%`)
 
         if (q.length < 1) {
             res.status(400)
