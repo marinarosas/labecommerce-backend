@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import { db } from './database/knex'
-import { TCreatePurchase, TProduct, TPurchase, TUsers, TUsersEdit } from '../src/types'
+import { TCreatePurchase, TEditPurchase, TProduct, TPurchase, TPurchasePaid, TUsers, TUsersEdit } from '../src/types'
 
 console.log('Hello world!')
 
@@ -530,7 +530,6 @@ app.post("/purchases", async (req: Request, res: Response) => {
             throw new Error("O 'buyer' deve iniciar com 'u'")
         }
 
-      
         let newPriceTotal = 0
 
         const bodyPurchase = {
@@ -577,7 +576,6 @@ app.post("/purchases", async (req: Request, res: Response) => {
     }
 })
 
-
 //##editPurchaseById
 app.put("/purchases/:id", async (req: Request, res: Response) => {
 
@@ -586,11 +584,16 @@ app.put("/purchases/:id", async (req: Request, res: Response) => {
         const newBuyer = req.body.buyer
         const newPaid = req.body.paid
 
-        const [purchase] = await db("purchases").where({ id: idToEdit })
+        const [purchase]: TPurchasePaid[] = await db("purchases").where({ id: idToEdit })
 
-        if (!purchase) {
+        if(idToEdit[0] !== "p"){
             res.status(400)
-            throw new Error("Id não cadastrado")
+            throw new Error("O id deve iniciar com 'pr'")
+        }
+
+        if(idToEdit[1] !== "r"){
+            res.status(400)
+            throw new Error("O id deve iniciar com 'pr'")
         }
 
         if (typeof newBuyer !== "string") {
@@ -598,7 +601,22 @@ app.put("/purchases/:id", async (req: Request, res: Response) => {
             throw new Error("'userId' e 'productId' são string.")
         }
 
-        const bodyPurchase = {
+        if(newBuyer[0] !== "u"){
+            res.status(400)
+            throw new Error("O 'buyer' deve iniciar com 'u'")
+        }
+
+        if(typeof newPaid !== 'number'){
+            res.status(400)
+            throw new Error("'paid' tem que ser 0 ou 1, sendo 0 para false e 1 para true.")
+        }
+
+        if (!purchase) {
+            res.status(400)
+            throw new Error("Id não cadastrado")
+        }
+
+        const bodyPurchase: TEditPurchase = {
             buyer: newBuyer || purchase.buyer,
             paid: isNaN(newPaid) ? purchase.paid : newPaid
         }
