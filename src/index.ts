@@ -247,14 +247,14 @@ app.post("/products", async (req: Request, res: Response) => {
             throw new Error("Id, name, price, description ou image_url faltando.")
         }
 
-        if (id[0] !== "p") {
-            res.status(400)
-            throw new Error("O id precisa iniciar com a letra 'p'")
-        }
-
         if (typeof id !== "string") {
             res.status(400)
             throw new Error("O tipo da id é uma string.")
+        }
+
+        if (id[0] !== "p") {
+            res.status(400)
+            throw new Error("O id precisa iniciar com a letra 'p'")
         }
 
         if (typeof name !== "string") {
