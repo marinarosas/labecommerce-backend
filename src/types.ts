@@ -30,3 +30,10 @@ export type TPurchase ={
     buyer: string,
     total_price: number
 }
+
+export type TCreatePurchase = {
+    id: string,
+    buyer: string,
+    totalPrice: number,
+    products: TProduct[]
+}
