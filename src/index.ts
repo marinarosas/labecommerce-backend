@@ -298,7 +298,7 @@ app.post("/products", async (req: Request, res: Response) => {
     }
 })
 
-// ## Get All Products
+// ## getAllProducts
 app.get("/products", async (req: Request, res: Response) => {
 
     try {
@@ -346,7 +346,7 @@ app.get("/products/search", async (req: Request, res: Response) => {
 
 })
 
-// ## Get Products by id
+// ## getProductsById
 app.get("/products/:id", async (req: Request, res: Response) => {
 
     try {
@@ -357,9 +357,9 @@ app.get("/products/:id", async (req: Request, res: Response) => {
             throw new Error("Faltou iniciar a Id com 'p'")
         }
 
-        const result = await db("products").where({ id: id })
+        const result: TProduct[] = await db("products").where({ id: id })
 
-        if (!result) {
+        if (result.length <= 0) {
             res.status(400)
             throw new Error("Produto não cadastrado")
         }
