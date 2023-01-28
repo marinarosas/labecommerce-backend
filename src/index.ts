@@ -14,12 +14,11 @@ app.listen(3003, () => {
     console.log("Servidor rodando na porta 3003")
 })
 
-app.get('/ping', (req: Request, res: Response) => {
-    res.send('Pong!')
-})
+//############ REGEX ############
 
 const regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
 const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,12}$/g
+
 //############ USERS ############
 
 //##createUser
@@ -665,7 +664,13 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
 
         const [idExist] = await db("purchases").where({ id: newIdPurchase })
 
-        if (newIdPurchase[0] !== "p" && newIdPurchase[1] !== "r") {
+
+        if(newIdPurchase[0] !== "p"){
+            res.status(400)
+            throw new Error("O id deve iniciar com 'pr'")
+        }
+
+        if(newIdPurchase[1] !== "r"){
             res.status(400)
             throw new Error("O id deve iniciar com 'pr'")
         }
@@ -675,17 +680,7 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
             throw new Error("Id não cadastrado")
         }
 
-        if (!newIdPurchase) {
-            res.status(400)
-            throw new Error("Falta adicionar id da compra.")
-        }
-
-        if (typeof newIdPurchase !== "string") {
-            res.status(400)
-            throw new Error("'id'é uma string.")
-        }
-
-        const [result] = await db("purchases").where({ id: newIdPurchase })
+        const [result]: TPurchase[] = await db("purchases").where({ id: newIdPurchase })
 
         res.status(201).send({ purchase: result })
 
