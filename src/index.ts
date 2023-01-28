@@ -704,10 +704,15 @@ app.delete("/purchases/:id", async (req: Request, res: Response) => {
     try {
         const idToDelete = req.params.id
 
-        const productDelete = await db("purchases").where({ id: idToDelete })
-        const purchaseDelete = await db("purchases_products").where({ purchase_id: idToDelete })
+        const productDelete: TPurchase[] = await db("purchases").where({ id: idToDelete })
+        const purchaseDelete: TPurchase[] = await db("purchases_products").where({ purchase_id: idToDelete })
 
-        if (idToDelete[0] !== "p" && idToDelete[1] !== "r") {
+        if(idToDelete[0] !== "p"){
+            res.status(400)
+            throw new Error("O id deve iniciar com 'pr'")
+        }
+
+        if(idToDelete[1] !== "r"){
             res.status(400)
             throw new Error("O id deve iniciar com 'pr'")
         }
