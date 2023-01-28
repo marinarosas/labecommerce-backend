@@ -106,7 +106,8 @@ app.post("/users", async (req: Request, res: Response) => {
 app.get("/users", async (req: Request, res: Response) => {
 
     try {
-        const result = await db('users')
+        
+        const result: TUsers = await db('users')
         res.status(200).send(result)
 
     } catch (error: any) {
