@@ -460,18 +460,24 @@ app.put("/products/:id", async (req: Request, res: Response) => {
 app.delete("/products/:id", async (req: Request, res: Response) => {
 
     try {
-        const id = req.params.id
+        const idToDelete = req.params.id
 
-        const productDelete = await db("products").where({ id: id })
+        if (idToDelete[0] !== "p") {
+            res.status(400)
+            throw new Error("O id precisa iniciar com a letra 'p'")
+        }
 
-        if (productDelete) {
-            await db("products").del().where({ id: id })
-            res.status(200).send({ message: "Produto apagado com sucesso" })
+        const [productExist] = await db("products").where({ id: idToDelete })
 
-        } else {
+        if(!productExist) {
             res.status(400)
             throw new Error("Produto não existe")
         }
+
+        if (productExist) {
+            await db("products").del().where({ id: idToDelete })
+            res.status(200).send({ message: "Produto apagado com sucesso" })
+        } 
 
     } catch (error: any) {
         console.log(error)
