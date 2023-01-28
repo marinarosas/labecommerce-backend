@@ -37,3 +37,19 @@ export type TCreatePurchase = {
     totalPrice: number,
     products: TProduct[]
 }
+
+
+
+// if (!newIdPurchase || !newBuyer) {
+//     res.status(400)
+//     throw new Error("Falta adicionar id, buyer e produtos.")
+// }
+
+
+
+
+
+// if(products.length <= 0){
+//     res.status(400)
+//     throw new Error ("Propriedade 'products' precisa ter pelo menos um objeto com id e quantidade, exemplo: {id: 'p001', quantity: 1}")
+// }
