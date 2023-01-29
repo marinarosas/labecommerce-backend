@@ -680,9 +680,34 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
             throw new Error("Id não cadastrado")
         }
 
-        const [result]: TPurchase[] = await db("purchases").where({ id: newIdPurchase })
+        if (idExist) {
 
-        res.status(201).send({ purchase: result })
+            const [cart] : TPurchase[] = await db("purchases")
+                .select(
+                    "purchases.id AS purchaseID",
+                    "purchases.total_price AS totalPrice",
+                    "purchases.created_at AS createdAt",
+                    "purchases.paid",
+                    "users.id AS buyerID",
+                    "users.email",
+                    "users.name")
+                .innerJoin("users", "purchases.buyer", "=", "users.id")
+                .where({ "purchases.id": newIdPurchase })
+
+            const purchaseProducts : TProduct[] = await db("purchases_products")
+                .select("purchases_products.product_id AS id",
+                    "products.name",
+                    "products.price",
+                    "products.description",
+                    "products.image_url AS urlImage",
+                    "purchases_products.quantity")
+                .innerJoin("products", "products.id", "=", "purchases_products.product_id")
+                .where({ purchase_id: newIdPurchase })
+            
+            
+            const result  = {...cart, products: purchaseProducts }
+            res.status(200).send(result)
+        }
 
     } catch (error: any) {
         console.log(error)
@@ -731,18 +756,3 @@ app.delete("/purchases/:id", async (req: Request, res: Response) => {
     }
 
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
